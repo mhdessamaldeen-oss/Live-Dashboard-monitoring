@@ -1,0 +1,143 @@
+.filter-card {
+    margin-bottom: 24px;
+}
+
+.filter-grid {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.filter-item {
+    min-width: 220px;
+}
+
+.flex-spacer {
+    flex: 1;
+}
+
+.mini-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.stat-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.stat-val {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* Table Style Refinement */
+.full-width {
+    width: 100%;
+}
+
+/* Standardized Column widths */
+.mat-column-timestamp {
+    width: 220px;
+}
+
+.mat-column-server {
+    width: 220px;
+}
+
+.mat-column-message {
+    width: auto;
+}
+
+.mat-column-severity {
+    width: 180px;
+}
+
+.mat-column-status {
+    width: 180px;
+}
+
+.mat-column-actions {
+    width: 140px;
+    text-align: right;
+}
+
+
+.message-cell {
+    max-width: 500px;
+    white-space: normal;
+    word-break: break-word;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Severity Pill - Using Design System Patterns */
+.severity-pill {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.severity-pill::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.severity-pill.critical {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.severity-pill.critical::before {
+    background: var(--danger);
+}
+
+.severity-pill.warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.severity-pill.warning::before {
+    background: var(--warning);
+}
+
+.severity-pill.information {
+    background: var(--info-soft);
+    color: var(--info);
+}
+
+.severity-pill.information::before {
+    background: var(--info);
+}
+
+.status-label {
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.status-label.open {
+    color: var(--danger);
+}
+
+.status-label.acknowledged {
+    color: var(--warning);
+}
+
+.status-label.resolved {
+    color: var(--success);
+}

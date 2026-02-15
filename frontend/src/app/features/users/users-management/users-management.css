@@ -1,0 +1,33 @@
+.users-management-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tab-icon {
+    margin-right: 8px;
+}
+
+.management-content {
+    padding: 0;
+    flex: 1;
+    overflow: auto;
+}
+
+:host ::ng-deep .mat-mdc-tab-nav-bar {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-base);
+    padding: 0 24px;
+}
+
+:host ::ng-deep .mat-mdc-tab-link {
+    height: 64px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--text-muted) !important;
+    opacity: 1 !important;
+}
+
+:host ::ng-deep .mat-mdc-tab-link.mdc-tab--active {
+    color: var(--primary) !important;
+}

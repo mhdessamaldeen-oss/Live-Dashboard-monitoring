@@ -1,0 +1,50 @@
+.dialog-content {
+    padding-top: 24px !important;
+}
+
+.dialog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.error-banner {
+    background: var(--danger-soft);
+    border-left: 4px solid var(--danger);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--danger);
+    font-weight: 500;
+}
+
+.submit-btn {
+    height: 52px;
+    border-radius: 12px;
+    font-weight: 700;
+    min-width: 200px;
+}
+
+.close-btn {
+    height: 48px;
+    border-radius: 12px;
+    min-width: 140px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+:host ::ng-deep .premium-field .mat-mdc-form-field-flex {
+    background: var(--bg-main) !important;
+    border-radius: 12px 12px 0 0 !important;
+}
+
+:host ::ng-deep .premium-btn .mat-icon {
+    margin-right: 8px;
+}

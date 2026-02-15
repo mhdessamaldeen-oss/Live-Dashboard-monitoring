@@ -1,0 +1,75 @@
+.table-wrapper {
+    overflow: hidden;
+}
+
+.loading-shade {
+    min-height: 200px;
+}
+
+.user-cell {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+}
+
+.user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-alt));
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    box-shadow: 0 4px 12px rgba(var(--p-h), var(--p-s), var(--p-l), 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-fullname {
+    font-weight: 700;
+    color: var(--text-hero);
+    font-size: 15px;
+    letter-spacing: -0.2px;
+}
+
+.text-muted {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.admin-chip {
+    background: var(--primary-soft) !important;
+    border: 1px solid var(--primary) !important;
+    color: var(--primary) !important;
+    font-weight: 700 !important;
+    height: 28px !important;
+}
+
+.status-pill {
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.status-pill.active {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.status-pill.inactive {
+    background: var(--danger-soft);
+    color: var(--danger);
+}

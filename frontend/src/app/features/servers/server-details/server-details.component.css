@@ -1,0 +1,200 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 48px;
+}
+
+.title-section {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.title-section h1 {
+    margin: 0;
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--text-hero);
+    letter-spacing: -0.04em;
+}
+
+.subtitle {
+    margin: 8px 0 0;
+    color: var(--text-muted);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Redesigned Back Button */
+.back-btn {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-base) !important;
+    color: var(--text-main) !important;
+    height: 44px !important;
+    padding: 0 20px !important;
+    box-shadow: var(--shadow-flat) !important;
+}
+
+.back-btn:hover {
+    background: var(--bg-main) !important;
+    transform: translateX(-4px);
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 32px;
+    margin-bottom: 48px;
+}
+
+.info-card {
+    border: 1px solid var(--border-base) !important;
+    box-shadow: var(--shadow-flat) !important;
+}
+
+.info-card .mat-mdc-card-header {
+    background: var(--bg-main);
+    border-bottom: 1px solid var(--border-base);
+    padding: 20px 24px !important;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-thin);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row span {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.info-row strong {
+    color: var(--text-hero);
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.usage-item {
+    margin-bottom: 32px;
+}
+
+.usage-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-main);
+}
+
+.charts-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 32px;
+}
+
+.chart-card {
+    padding: 32px;
+    min-height: 480px;
+    border: 1px solid var(--border-base) !important;
+}
+
+/* Progress Bar Refinement */
+::ng-deep .mat-mdc-progress-bar {
+    height: 10px !important;
+    border-radius: 5px !important;
+}
+
+::ng-deep .mat-mdc-progress-bar.cpu-bar .mdc-linear-progress__bar-inner {
+    background-color: var(--primary) !important;
+}
+
+::ng-deep .mat-mdc-progress-bar.mem-bar .mdc-linear-progress__bar-inner {
+    background-color: var(--accent) !important;
+}
+
+::ng-deep .mat-mdc-progress-bar.disk-bar .mdc-linear-progress__bar-inner {
+    background-color: var(--warning) !important;
+}
+
+/* History Table Clarity */
+.mat-mdc-header-row {
+    background-color: var(--bg-main);
+    height: 64px;
+}
+
+.mat-mdc-header-cell {
+    padding: 0 40px !important;
+    border-bottom: 2px solid var(--border-base) !important;
+}
+
+.mat-mdc-cell {
+    padding: 24px 40px !important;
+    border-bottom: 1px solid var(--border-base) !important;
+    color: var(--text-main) !important;
+}
+
+.mat-column-timestamp {
+    width: 200px;
+}
+
+.mat-column-cpu {
+    width: 180px;
+}
+
+.mat-column-memory {
+    width: 180px;
+}
+
+.mat-column-disk {
+    width: auto;
+}
+
+/* Pulse Animation for Live Nodes */
+.status-pill.online::before {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.5);
+        opacity: 0.5;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-base);
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-hero);
+}

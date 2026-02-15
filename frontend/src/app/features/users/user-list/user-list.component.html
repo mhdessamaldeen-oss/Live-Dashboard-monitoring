@@ -1,0 +1,55 @@
+<div class="tab-content-wrapper animate-reveal" style="padding: 24px;">
+    <div class="tab-actions" style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
+        <button *ngIf="authService.isAdmin()" mat-flat-button color="primary" (click)="provisionUser()">
+            <mat-icon>person_add</mat-icon>
+            Provision User
+        </button>
+    </div>
+
+    <div class="glass-panel table-wrapper">
+        <div *ngIf="loading" class="loading-shade"
+            style="padding: 100px; display: flex; justify-content: center; background: rgba(0,0,0,0.05);">
+            <mat-spinner diameter="48"></mat-spinner>
+        </div>
+
+        <app-table *ngIf="!loading" [data]="users" [columns]="columns" [showPaginator]="false">
+            <ng-template #cellTemplate let-user let-key="key">
+                <ng-container [ngSwitch]="key">
+                    <div *ngSwitchCase="'name'" class="user-cell">
+                        <div class="user-avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
+                        <div class="user-info">
+                            <div class="user-fullname">{{ user.firstName }} {{ user.lastName }}</div>
+                        </div>
+                    </div>
+
+                    <div *ngSwitchCase="'email'">
+                        <span class="text-muted">{{ user.email }}</span>
+                    </div>
+
+                    <div *ngSwitchCase="'role'">
+                        <mat-chip-set>
+                            <mat-chip [class.admin-chip]="user.role === 'Admin'">{{ user.role }}</mat-chip>
+                        </mat-chip-set>
+                    </div>
+
+                    <div *ngSwitchCase="'status'">
+                        <span class="status-pill" [class.active]="user.isActive" [class.inactive]="!user.isActive">
+                            {{ user.isActive ? 'Active' : 'Inactive' }}
+                        </span>
+                    </div>
+
+                    <div *ngSwitchCase="'actions'">
+                        <button mat-icon-button color="primary" matTooltip="Edit Profile" (click)="openUserDialog(user)"
+                            *ngIf="authService.isAdmin()">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" matTooltip="Delete User" (click)="deleteUser(user)"
+                            *ngIf="authService.isAdmin()">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </ng-container>
+            </ng-template>
+        </app-table>
+    </div>
+</div>

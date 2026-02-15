@@ -1,0 +1,75 @@
+<div class="login-container">
+  <div class="background-blobs">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+
+  <mat-card class="login-card animate-fade">
+    <div class="header-section">
+      <div class="logo-wrapper">
+        <div class="logo-icon-premium">
+          <mat-icon>dashboard_customize</mat-icon>
+        </div>
+      </div>
+      <div class="title-group">
+        <h1 class="premium-title">Welcome Back</h1>
+        <p class="premium-description">Monitor your infrastructure with clarity and precision.</p>
+        <div class="subtitle-wrapper">
+          <div class="status-indicator"></div>
+          <p class="premium-subtitle">System Status: Online</p>
+        </div>
+      </div>
+    </div>
+
+    <mat-progress-bar *ngIf="loading" mode="indeterminate" class="login-progress"></mat-progress-bar>
+
+    <mat-card-content class="form-section">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="premium-form">
+        <div class="input-group">
+          <mat-form-field appearance="outline" class="full-width premium-field">
+            <mat-label>Work Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="e.g., admin@demo.com">
+            <mat-icon matPrefix color="primary">alternate_email</mat-icon>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('required')">Email is required</mat-error>
+            <mat-error *ngIf="loginForm.get('email')?.hasError('email')">Please enter a valid email</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="input-group">
+          <mat-form-field appearance="outline" class="full-width premium-field">
+            <mat-label>Password</mat-label>
+            <input matInput formControlName="password" [type]="hidePassword ? 'password' : 'text'"
+              placeholder="••••••••">
+            <mat-icon matPrefix color="primary">key</mat-icon>
+            <button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" type="button"
+              class="password-toggle">
+              <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+            </button>
+            <mat-error *ngIf="loginForm.get('password')?.hasError('required')">Password is required</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div *ngIf="error" class="error-container-premium">
+          <mat-icon>report_problem</mat-icon>
+          <span>{{ error }}</span>
+        </div>
+
+        <button mat-raised-button color="primary" class="login-button-premium" type="submit"
+          [disabled]="loading || loginForm.invalid">
+          <span class="btn-content" *ngIf="!loading">
+            Sign In to Dashboard
+            <mat-icon class="btn-arrow">arrow_forward</mat-icon>
+          </span>
+          <span class="btn-content" *ngIf="loading">
+            Authenticating...
+          </span>
+        </button>
+      </form>
+    </mat-card-content>
+
+    <div class="footer-note-premium">
+      <p>Quick Access: <span class="hint-pill">admin@demo.com</span> / <span class="hint-pill">Admin123!</span></p>
+    </div>
+  </mat-card>
+</div>

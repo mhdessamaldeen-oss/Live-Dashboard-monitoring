@@ -1,0 +1,13 @@
+<mat-card class="stat-card animate-reveal">
+  <mat-card-content>
+    <div class="stat-content">
+      <div class="stat-info">
+        <p class="stat-label">{{ label }}</p>
+        <h3 class="stat-value">{{ value }}</h3>
+      </div>
+      <div class="stat-icon-wrapper" [style.background-color]="iconBg">
+        <mat-icon [style.color]="iconColor">{{ icon }}</mat-icon>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

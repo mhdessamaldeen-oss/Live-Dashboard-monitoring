@@ -1,0 +1,313 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  /* Clean, bright "Cloud" gradient */
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+/* Softer, lighter "Aura" blobs */
+.background-blobs {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.blob {
+  position: absolute;
+  filter: blur(100px);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: move 25s infinite alternate ease-in-out;
+}
+
+.blob-1 {
+  width: 600px;
+  height: 600px;
+  background: #3b82f6;
+  /* Soft Blue */
+  top: -150px;
+  left: -150px;
+}
+
+.blob-2 {
+  width: 500px;
+  height: 500px;
+  background: #10b981;
+  /* Soft Emerald */
+  bottom: -150px;
+  right: -100px;
+  animation-delay: -7s;
+}
+
+.blob-3 {
+  width: 400px;
+  height: 400px;
+  background: #818cf8;
+  /* Soft Indigo */
+  top: 30%;
+  left: 70%;
+  animation-delay: -12s;
+}
+
+@keyframes move {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+
+  to {
+    transform: translate(80px, 40px) scale(1.05);
+  }
+}
+
+.login-card {
+  width: 460px;
+  z-index: 10;
+  padding: 48px !important;
+  /* Bright, clean glassmorphism */
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-radius: 36px !important;
+  /* Softer shadow for light mode */
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08) !important;
+  color: #1e293b;
+  transition: transform 0.4s var(--bounce);
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.12) !important;
+}
+
+.header-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+  gap: 20px;
+}
+
+.logo-icon-premium {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #2563eb, #0ea5e9);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 24px -6px rgba(37, 99, 235, 0.3);
+}
+
+.logo-icon-premium mat-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: white;
+}
+
+.title-group {
+  text-align: center;
+}
+
+.premium-title {
+  font-size: 34px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.premium-description {
+  color: #64748b;
+  font-size: 15px;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.subtitle-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+
+  70% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.premium-subtitle {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.form-section {
+  padding: 0 !important;
+}
+
+/* Material Field Customization for High Clarity & Friendliness */
+::ng-deep .premium-field .mat-mdc-text-field-wrapper {
+  background: white !important;
+  border-radius: 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Remove Material's default transparent background */
+::ng-deep .premium-field .mdc-text-field--outline:not(.mdc-text-field--disabled) .mdc-text-field__input {
+  background: transparent !important;
+}
+
+/* Fix height and centering through the container instead of hardcoding wrapper */
+::ng-deep .premium-field .mat-mdc-form-field-flex {
+  height: 60px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Style the standard outline border - NO DOUBLE BORDERS */
+::ng-deep .premium-field .mdc-notched-outline__leading,
+::ng-deep .premium-field .mdc-notched-outline__notch,
+::ng-deep .premium-field .mdc-notched-outline__trailing {
+  border-color: #e2e8f0 !important;
+  border-width: 1px !important;
+}
+
+::ng-deep .premium-field.mat-focused .mdc-notched-outline__leading,
+::ng-deep .premium-field.mat-focused .mdc-notched-outline__notch,
+::ng-deep .premium-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #2563eb !important;
+  border-width: 2px !important;
+}
+
+/* Hover state */
+::ng-deep .premium-field:not(.mat-focused):hover .mdc-notched-outline__leading,
+::ng-deep .premium-field:not(.mat-focused):hover .mdc-notched-outline__notch,
+::ng-deep .premium-field:not(.mat-focused):hover .mdc-notched-outline__trailing {
+  border-color: #cbd5e1 !important;
+}
+
+/* Premium Label Styling */
+::ng-deep .premium-field .mat-mdc-floating-label {
+  color: #64748b !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+}
+
+::ng-deep .premium-field.mat-focused .mat-mdc-floating-label {
+  color: #2563eb !important;
+}
+
+/* Ensure the label sits comfortably in the notch */
+::ng-deep .premium-field .mat-mdc-form-field-label-wrapper {
+  top: 0 !important;
+  padding-top: 20px !important;
+}
+
+/* Input alignment */
+::ng-deep .premium-field .mat-mdc-input-element {
+  color: #0f172a !important;
+  font-weight: 500 !important;
+  font-size: 16px !important;
+  padding-top: 4px !important;
+}
+
+::ng-deep .premium-field .mat-icon[matPrefix] {
+  color: #2563eb !important;
+  font-size: 20px !important;
+  margin-right: 12px;
+  display: flex;
+  align-items: center;
+}
+
+::ng-deep .premium-field .mat-mdc-form-field-icon-prefix {
+  padding: 0 !important;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.login-button-premium {
+  width: 100%;
+  height: 60px !important;
+  border-radius: 16px !important;
+  margin-top: 24px;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.login-button-premium:hover:not(:disabled) {
+  background: #1d4ed8 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px -5px rgba(37, 99, 235, 0.4) !important;
+}
+
+.error-container-premium {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #b91c1c;
+  padding: 14px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.footer-note-premium {
+  margin-top: 40px;
+  text-align: center;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.hint-pill {
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #334155;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  border: 1px solid #e2e8f0;
+}

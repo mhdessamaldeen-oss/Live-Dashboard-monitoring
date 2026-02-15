@@ -1,0 +1,139 @@
+<h2 mat-dialog-title class="gradient-text">{{ isEdit ? 'Configure Node: ' + data?.name : 'Provision New Infrastructure
+    Node' }}</h2>
+
+<mat-dialog-content class="dialog-content">
+    <div style="min-width: 500px;">
+        <div *ngIf="errorMessage" class="error-banner animate-fade">
+            <mat-icon>report_problem</mat-icon>
+            <span>{{ errorMessage }}</span>
+        </div>
+
+        <form [formGroup]="provisionForm">
+            <mat-tab-group animationDuration="0ms">
+                <!-- General Tab -->
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <mat-icon style="margin-right: 8px;">settings</mat-icon>
+                        General Configuration
+                    </ng-template>
+
+                    <div class="dialog-form" style="padding-top: 20px;">
+                        <mat-form-field appearance="outline" class="premium-field">
+                            <mat-label>Node Name</mat-label>
+                            <input matInput formControlName="name" placeholder="e.g. CORE-PROD-01">
+                            <mat-icon matPrefix>badge</mat-icon>
+                            <mat-error *ngIf="provisionForm.get('name')?.hasError('required')">Identifier is
+                                mandatory</mat-error>
+                        </mat-form-field>
+
+                        <div class="grid-2">
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>IP Address / Endpoint</mat-label>
+                                <input matInput formControlName="ipAddress" placeholder="e.g. 10.0.0.5">
+                                <mat-icon matPrefix>lan</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Hostname</mat-label>
+                                <input matInput formControlName="hostName" placeholder="e.g. core-prod-01.local">
+                                <mat-icon matPrefix>dns</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="grid-2">
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Operating System</mat-label>
+                                <mat-select formControlName="operatingSystem">
+                                    <mat-option value="Ubuntu 22.04 LTS">Ubuntu 22.04 LTS</mat-option>
+                                    <mat-option value="CentOS Stream 9">CentOS Stream 9</mat-option>
+                                    <mat-option value="Windows Server 2022">Windows Server 2022</mat-option>
+                                    <mat-option value="Debian 12">Debian 12</mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>settings_system_daydream</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Availability Zone</mat-label>
+                                <mat-select formControlName="location">
+                                    <mat-option value="US-East-1">US-East-1</mat-option>
+                                    <mat-option value="EU-West-1">EU-West-1</mat-option>
+                                    <mat-option value="Asia-Pacific-S">Asia-Pacific-S</mat-option>
+                                    <mat-option value="Local Data Center">Local Data Center</mat-option>
+                                </mat-select>
+                                <mat-icon matPrefix>public</mat-icon>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- Thresholds Tab -->
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <mat-icon style="margin-right: 8px;">speed</mat-icon>
+                        Health Thresholds
+                    </ng-template>
+
+                    <div class="dialog-form" style="padding-top: 20px;">
+                        <h4 class="text-muted" style="margin-bottom: 8px; font-size: 13px; text-transform: uppercase;">
+                            CPU Utilization (%)</h4>
+                        <div class="grid-2">
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Warning (%)</mat-label>
+                                <input matInput type="number" formControlName="cpuWarningThreshold">
+                                <mat-icon matPrefix color="primary">warning</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Critical (%)</mat-label>
+                                <input matInput type="number" formControlName="cpuCriticalThreshold">
+                                <mat-icon matPrefix style="color: var(--danger)">report</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <h4 class="text-muted" style="margin: 12px 0 8px; font-size: 13px; text-transform: uppercase;">
+                            Memory Utilization (%)</h4>
+                        <div class="grid-2">
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Warning (%)</mat-label>
+                                <input matInput type="number" formControlName="memoryWarningThreshold">
+                                <mat-icon matPrefix color="primary">warning</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Critical (%)</mat-label>
+                                <input matInput type="number" formControlName="memoryCriticalThreshold">
+                                <mat-icon matPrefix style="color: var(--danger)">report</mat-icon>
+                            </mat-form-field>
+                        </div>
+
+                        <h4 class="text-muted" style="margin: 12px 0 8px; font-size: 13px; text-transform: uppercase;">
+                            Disk Utilization (%)</h4>
+                        <div class="grid-2">
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Warning (%)</mat-label>
+                                <input matInput type="number" formControlName="diskWarningThreshold">
+                                <mat-icon matPrefix color="primary">warning</mat-icon>
+                            </mat-form-field>
+                            <mat-form-field appearance="outline" class="premium-field">
+                                <mat-label>Critical (%)</mat-label>
+                                <input matInput type="number" formControlName="diskCriticalThreshold">
+                                <mat-icon matPrefix style="color: var(--danger)">report</mat-icon>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </form>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button (click)="onCancel()" [disabled]="loading" *ngIf="!errorMessage">Cancel</button>
+
+    <button mat-flat-button color="primary" [disabled]="provisionForm.invalid || loading" (click)="onProvision()"
+        class="submit-btn premium-btn">
+        <mat-icon *ngIf="!loading">{{ isEdit ? 'save' : 'rocket_launch' }}</mat-icon>
+        <span *ngIf="!loading">{{ isEdit ? 'Apply Configuration' : 'Initialize Deployment' }}</span>
+        <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+        <span *ngIf="loading" style="margin-left: 8px;">{{ isEdit ? 'Updating Node...' : 'Provisioning Engine Active...'
+            }}</span>
+    </button>
+</mat-dialog-actions>

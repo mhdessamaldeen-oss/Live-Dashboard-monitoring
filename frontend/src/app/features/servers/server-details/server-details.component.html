@@ -1,0 +1,179 @@
+@if (server$ | async; as server) {
+<div class="page-container animate-fade">
+    <div class="header">
+        <div class="title-section">
+            <button mat-icon-button routerLink="/servers" class="back-btn" matTooltip="Back to Infrastructure">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div>
+                <h1>{{ server.name }}</h1>
+                <p class="subtitle">{{ server.hostName }} • {{ server.ipAddress }}</p>
+            </div>
+        </div>
+        <div class="actions">
+            <span class="status-pill" [class]="server.status.toLowerCase()">
+                {{ server.status }}
+            </span>
+            <button mat-flat-button color="warn" style="font-weight: 700;">
+                <mat-icon>restart_alt</mat-icon>
+                Restart Agent
+            </button>
+        </div>
+    </div>
+
+    <div class="details-grid">
+        <!-- Info Cards -->
+        <mat-card class="info-card">
+            <mat-card-header style="margin-bottom: 16px;">
+                <mat-icon mat-card-avatar color="primary"
+                    style="background: var(--primary-soft); border-radius: 8px; padding: 8px;">hub</mat-icon>
+                <mat-card-title style="font-size: 16px; font-weight: 700;">System Properties</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="info-row">
+                    <span>OS Platform</span>
+                    <strong>{{ server.operatingSystem }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Region / Zone</span>
+                    <strong>{{ server.location }}</strong>
+                </div>
+                <div class="info-row">
+                    <span>Processor Architecture</span>
+                    <strong>x64</strong>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="info-card current-usage">
+            <mat-card-header style="margin-bottom: 16px;">
+                <ng-container *ngIf="metrics$ | async as metrics">
+                    @let current = metrics[0];
+                    <mat-icon mat-card-avatar
+                        [style.background]="(current && current.cpuUsage > 90) ? 'var(--danger-soft)' : 'var(--success-soft)'"
+                        [style.color]="(current && current.cpuUsage > 90) ? 'var(--danger)' : 'var(--success)'"
+                        style="border-radius: 8px; padding: 8px;">insights</mat-icon>
+                    <mat-card-title style="font-size: 16px; font-weight: 700;">Live Resource Monitor</mat-card-title>
+                </ng-container>
+            </mat-card-header>
+            <mat-card-content>
+                <ng-container *ngIf="metrics$ | async as metrics">
+                    @if (metrics.length > 0) {
+                    @let currentMetrics = metrics[0];
+                    <div class="usage-item">
+                        <div class="usage-header">
+                            <span>CPU Usage</span>
+                            <span>{{ currentMetrics.cpuUsage | number:'1.1-1' }}%</span>
+                        </div>
+                        <mat-progress-bar mode="determinate" [value]="currentMetrics.cpuUsage"
+                            class="cpu-bar"></mat-progress-bar>
+                    </div>
+
+                    <div class="usage-item">
+                        <div class="usage-header">
+                            <span>Memory Usage</span>
+                            <span>{{ currentMetrics.memoryUsage | number:'1.1-1' }}%</span>
+                        </div>
+                        <mat-progress-bar mode="determinate" [value]="currentMetrics.memoryUsage"
+                            class="mem-bar"></mat-progress-bar>
+                    </div>
+
+                    <!-- Individual Disks -->
+                    @if (currentMetrics.disks && currentMetrics.disks.length > 0) {
+                        @for (disk of currentMetrics.disks; track disk.driveLetter) {
+                            <div class="usage-item">
+                                <div class="usage-header">
+                                    <span>Disk {{ disk.driveLetter }}</span>
+                                    <span>{{ disk.usedPercentage | number:'1.1-1' }}%</span>
+                                </div>
+                                <mat-progress-bar mode="determinate" [value]="disk.usedPercentage" 
+                                    [color]="disk.usedPercentage > 90 ? 'warn' : (disk.usedPercentage > 80 ? 'accent' : 'primary')"
+                                    class="disk-bar"></mat-progress-bar>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                                    {{ (disk.totalSpaceMB - disk.freeSpaceMB) / 1024 | number:'1.1-1' }} GB used of {{ disk.totalSpaceMB / 1024 | number:'1.1-1' }} GB
+                                </div>
+                            </div>
+                        }
+                    } @else {
+                        <!-- Fallback for legacy metrics without disk info -->
+                        <div class="usage-item">
+                            <div class="usage-header">
+                                <span>Total Disk Usage</span>
+                                <span>{{ currentMetrics.diskUsage | number:'1.1-1' }}%</span>
+                            </div>
+                            <mat-progress-bar mode="determinate" [value]="currentMetrics.diskUsage"
+                                class="disk-bar"></mat-progress-bar>
+                        </div>
+                    }
+                    } @else {
+                    <div style="padding: 20px; text-align: center; color: var(--text-muted);">
+                        <mat-icon
+                            style="font-size: 32px; width: 32px; height: 32px; opacity: 0.5;">sensors_off</mat-icon>
+                        <p>Waiting for sensor data...</p>
+                    </div>
+                    }
+                </ng-container>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+        <mat-card class="chart-card">
+            <apx-chart [series]="cpuChartOptions.series" [chart]="cpuChartOptions.chart" [xaxis]="cpuChartOptions.xaxis"
+                [stroke]="cpuChartOptions.stroke" [dataLabels]="cpuChartOptions.dataLabels"
+                [yaxis]="cpuChartOptions.yaxis" [title]="cpuChartOptions.title" [tooltip]="cpuChartOptions.tooltip"
+                [fill]="cpuChartOptions.fill" [colors]="cpuChartOptions.colors">
+            </apx-chart>
+        </mat-card>
+
+        <mat-card class="chart-card">
+            <apx-chart [series]="memChartOptions.series" [chart]="memChartOptions.chart" [xaxis]="memChartOptions.xaxis"
+                [stroke]="memChartOptions.stroke" [dataLabels]="memChartOptions.dataLabels"
+                [yaxis]="memChartOptions.yaxis" [title]="memChartOptions.title" [tooltip]="memChartOptions.tooltip"
+                [fill]="memChartOptions.fill" [colors]="memChartOptions.colors">
+            </apx-chart>
+        </mat-card>
+    </div>
+
+    <!-- History Table -->
+    <mat-card class="mt-4 section-card">
+        <div class="section-header">
+            <h2 style="font-size: 16px;">Metric Historical Data</h2>
+            <button mat-button color="primary">Export CSV</button>
+        </div>
+
+        <app-table [data]="(metrics$ | async) || []" [columns]="columns" [showPaginator]="false" style="padding: 0;">
+            <ng-template #cellTemplate let-m let-key="key">
+                <ng-container [ngSwitch]="key">
+                    <div *ngSwitchCase="'timestamp'">
+                        {{ m.timestamp | date:'HH:mm:ss' }}
+                    </div>
+                    <div *ngSwitchCase="'cpuUsage'" style="font-weight: 600;">
+                        {{ m.cpuUsage | number:'1.2-2' }}%
+                    </div>
+                    <div *ngSwitchCase="'memoryUsage'" style="font-weight: 600;">
+                        {{ m.memoryUsage | number:'1.2-2' }}%
+                    </div>
+                    <div *ngSwitchCase="'diskUsage'">
+                        {{ m.diskUsage | number:'1.2-2' }}%
+                    </div>
+                </ng-container>
+            </ng-template>
+        </app-table>
+    </mat-card>
+</div>
+} @else if (serversLoading$ | async) {
+<div class="loading-shade">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <p style="margin-top: 16px; font-weight: 600; color: var(--text-muted);">Synchronizing node data...</p>
+</div>
+} @else {
+<div class="loading-container">
+    <mat-icon color="warn"
+        style="font-size: 64px; width: 64px; height: 64px; margin-bottom: 24px;">report_problem</mat-icon>
+    <h1 style="margin: 0;">Node Resolution Failed</h1>
+    <p style="margin: 12px 0 32px;">The requested infrastructure node could not be located in the current zone.</p>
+    <button mat-flat-button color="primary" routerLink="/servers">Return to Global View</button>
+</div>
+}

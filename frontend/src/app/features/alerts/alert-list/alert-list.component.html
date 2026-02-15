@@ -1,0 +1,96 @@
+<div class="page-container animate-fade">
+    <div class="page-header">
+        <div>
+            <h1 class="gradient-text">System Incidents</h1>
+            <p>Real-time event monitoring and incident resolution</p>
+        </div>
+        <div class="header-stats" style="display: flex; gap: 24px;">
+            <div class="mini-stat">
+                <span class="stat-label">Total Results</span>
+                <span class="stat-val" style="color: var(--primary);">{{ totalCount$ | async }}</span>
+            </div>
+            <button mat-flat-button color="primary" style="height: 48px; padding: 0 24px;" (click)="archiveResolved()">
+                <mat-icon style="margin-right: 8px;">archive</mat-icon>
+                Archive Resolved
+            </button>
+        </div>
+    </div>
+
+    <div class="filter-card animate-fade" style="margin-bottom: 24px;">
+        <div class="filter-group">
+            <mat-form-field appearance="outline" class="filter-item-compact">
+                <mat-icon matPrefix color="primary">priority_high</mat-icon>
+                <mat-select [(ngModel)]="severityFilter" (selectionChange)="applyFilter()" aria-label="Severity Level">
+                    <mat-option value="">All Severities</mat-option>
+                    <mat-option [value]="AlertSeverity.Info">Info</mat-option>
+                    <mat-option [value]="AlertSeverity.Warning">Warning</mat-option>
+                    <mat-option [value]="AlertSeverity.Critical">Critical</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-item-compact">
+                <mat-icon matPrefix color="primary">filter_tilt_shift</mat-icon>
+                <mat-select [(ngModel)]="statusFilter" (selectionChange)="applyFilter()" aria-label="Resolution Status">
+                    <mat-option value="">All Statuses</mat-option>
+                    <mat-option [value]="AlertStatus.Active">Unresolved</mat-option>
+                    <mat-option [value]="AlertStatus.Acknowledged">Acknowledged</mat-option>
+                    <mat-option [value]="AlertStatus.Resolved">Resolved</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <button mat-button (click)="severityFilter=''; statusFilter=''; applyFilter()" color="warn"
+                class="refresh-btn">
+                <mat-icon>clear_all</mat-icon>
+                Reset System State
+            </button>
+        </div>
+    </div>
+
+    <mat-card class="table-card section-card">
+        <div class="section-header" style="border-bottom: 1px solid var(--border-base); padding: 16px 24px;">
+            <h2 style="margin: 0; font-size: 18px; font-weight: 700;">Active Incident Stream</h2>
+        </div>
+
+        <app-table [data]="(alerts$ | async) || []" [columns]="columns" [loading]="(loading$ | async) || false"
+            [totalCount]="(totalCount$ | async) || 0" [pageSize]="pageSize" (page)="onPageChange($event)"
+            (sort)="onSortChange($event)">
+
+            <ng-template #cellTemplate let-element let-key="key">
+                <ng-container [ngSwitch]="key">
+                    <div *ngSwitchCase="'serverName'" style="font-weight: 600; color: var(--primary);">
+                        {{ element.serverName }}
+                    </div>
+
+                    <div *ngSwitchCase="'severity'">
+                        @if (element.severity) {
+                        <span class="severity-pill" [class]="element.severity.toLowerCase()">
+                            {{ element.severity }}
+                        </span>
+                        }
+                    </div>
+
+                    <div *ngSwitchCase="'status'">
+                        <span class="status-label" [class]="element.status.toLowerCase()">
+                            {{ element.status }}
+                        </span>
+                    </div>
+
+                    <div *ngSwitchCase="'actions'" style="text-align: right;">
+                        @if (element.status === AlertStatus.Active) {
+                        <button mat-icon-button color="primary" (click)="acknowledge(element.id)"
+                            matTooltip="Acknowledge Receipt">
+                            <mat-icon style="font-size: 20px;">visibility</mat-icon>
+                        </button>
+                        }
+                        @if (element.status !== AlertStatus.Resolved) {
+                        <button mat-icon-button color="accent" (click)="resolve(element.id)"
+                            matTooltip="Mark as Resolved">
+                            <mat-icon style="font-size: 20px;">check_circle_outline</mat-icon>
+                        </button>
+                        }
+                    </div>
+                </ng-container>
+            </ng-template>
+        </app-table>
+    </mat-card>
+</div>

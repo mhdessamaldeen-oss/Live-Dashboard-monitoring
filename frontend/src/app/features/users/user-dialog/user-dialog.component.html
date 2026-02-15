@@ -1,0 +1,73 @@
+<div class="dialog-wrapper">
+    <h2 mat-dialog-title class="gradient-text">{{ isEditMode ? 'Authorize Role Capabilities' : 'Define New System Role'
+        }}</h2>
+
+    <mat-dialog-content class="dialog-content">
+        <div *ngIf="errorMessage" class="error-banner animate-fade">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ errorMessage }}</span>
+        </div>
+
+        <form [formGroup]="userForm" class="dialog-form">
+            <div class="grid-2">
+                <mat-form-field appearance="outline" class="premium-field">
+                    <mat-label>First Name</mat-label>
+                    <input matInput formControlName="firstName" placeholder="John">
+                    <mat-icon matPrefix color="primary">person</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="premium-field">
+                    <mat-label>Last Name</mat-label>
+                    <input matInput formControlName="lastName" placeholder="Doe">
+                    <mat-icon matPrefix color="primary">badge</mat-icon>
+                </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="premium-field">
+                <mat-label>Email Address</mat-label>
+                <input matInput formControlName="email" type="email" placeholder="user@example.com">
+                <mat-icon matPrefix color="primary">email</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="premium-field" *ngIf="!isEditMode">
+                <mat-label>Temporary Password</mat-label>
+                <input matInput formControlName="password" type="password" placeholder="Secure password">
+                <mat-icon matPrefix color="primary">lock</mat-icon>
+                <mat-hint>Must be at least 6 characters</mat-hint>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="premium-field">
+                <mat-label>Assigned System Role</mat-label>
+                <mat-select formControlName="role">
+                    <mat-option *ngFor="let role of roles" [value]="role.name">
+                        <div class="role-option">
+                            <mat-icon style="margin-right: 8px; font-size: 20px;" color="primary">shield</mat-icon>
+                            <span>{{ role.name }}</span>
+                        </div>
+                    </mat-option>
+                </mat-select>
+                <mat-icon matPrefix color="primary">admin_panel_settings</mat-icon>
+            </mat-form-field>
+
+            <div *ngIf="isEditMode" class="status-toggle">
+                <mat-checkbox formControlName="isActive" color="primary">
+                    Account Status: <span [class.text-success]="userForm.get('isActive')?.value"
+                        [class.text-danger]="!userForm.get('isActive')?.value">
+                        {{ userForm.get('isActive')?.value ? 'Active' : 'Deactivated' }}
+                    </span>
+                </mat-checkbox>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button (click)="onCancel()" [disabled]="loading">Cancel</button>
+        <button mat-flat-button color="primary" [disabled]="userForm.invalid || loading" (click)="onSubmit()"
+            class="submit-btn premium-btn">
+            <mat-icon *ngIf="!loading">{{ isEditMode ? 'save' : 'person_add' }}</mat-icon>
+            <span *ngIf="!loading">{{ isEditMode ? 'Save Changes' : 'Provision User' }}</span>
+            <mat-spinner *ngIf="loading" diameter="24"></mat-spinner>
+            <span *ngIf="loading" style="margin-left: 8px;">{{ isEditMode ? 'Updating...' : 'Provisioning...' }}</span>
+        </button>
+    </mat-dialog-actions>
+</div>

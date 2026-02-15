@@ -1,0 +1,91 @@
+name: Monitoring Dashboard CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────
+  # 1. CI: Build and Test everything
+  # ───────────────────────────────────────────────────────────────────
+  ci:
+    name: Continuous Integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # --- Backend ---
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: app/MonitoringDashboard.sln
+
+      - name: Restore Backend
+        run: dotnet restore app/MonitoringDashboard.sln
+
+      - name: Build Backend
+        run: dotnet build app/MonitoringDashboard.sln -c Release --no-restore
+
+      - name: Run Tests
+        # We run all tests. Integration tests will automatically start Docker containers (SQL/Redis)
+        run: |
+          dotnet test app/tests/Domain.Tests/Domain.Tests.csproj -c Release --no-build
+          dotnet test app/tests/Application.Tests/Application.Tests.csproj -c Release --no-build
+          dotnet test app/tests/WebAPI.IntegrationTests/WebAPI.IntegrationTests.csproj -c Release --no-build
+      # --- Frontend ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Frontend
+        run: npm install --legacy-peer-deps
+        working-directory: frontend
+
+      - name: Build Frontend
+        run: npm run build
+        working-directory: frontend
+
+  # ───────────────────────────────────────────────────────────────────
+  # 2. CD: Build and Push Docker Images
+  # ───────────────────────────────────────────────────────────────────
+  # This only runs if the 'ci' job finishes successfully
+  cd:
+    name: Continuous Deployment
+    needs: ci
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      # --- Build & Push Backend ---
+      - name: Backend - Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./app
+          file: app/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/monitoring-backend:latest
+
+      # --- Build & Push Frontend ---
+      - name: Frontend - Build and Push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: frontend/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/monitoring-frontend:latest

@@ -1,0 +1,95 @@
+.table-wrapper {
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.job-name {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+}
+
+.task-icon-wrapper {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--control-radius);
+    background: var(--primary-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.task-icon-wrapper mat-icon {
+    color: var(--primary);
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+}
+
+.job-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.primary-text {
+    font-weight: 700;
+    color: var(--text-hero);
+    font-size: 15px;
+}
+
+.secondary-text {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.cron-tag {
+    background: var(--bg-main);
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--border-base);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.time-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.time-stamp mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+}
+
+.time-stamp.highlight {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.time-stamp.highlight mat-icon {
+    color: var(--accent);
+}
+
+.status-pill.active {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.dashboard-link-btn {
+    border-right: 1px solid var(--border-base) !important;
+    color: var(--primary) !important;
+}
+
+.dashboard-link-btn:hover {
+    background: var(--primary-soft) !important;
+}

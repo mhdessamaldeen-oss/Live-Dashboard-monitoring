@@ -1,0 +1,287 @@
+<div class="page-container animate-fade">
+    <div class="page-header">
+        <div>
+            <h1 class="gradient-text">Analytics & Reporting</h1>
+            <p>Generate comprehensive system reports and performance analytics</p>
+        </div>
+        <div class="header-actions">
+            <button mat-flat-button color="primary" (click)="openReportWizard()">
+                <mat-icon>add_chart</mat-icon>
+                Create Report
+            </button>
+            <button mat-stroked-button (click)="openScheduleDialog()">
+                <mat-icon>schedule</mat-icon>
+                Schedule
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats Section -->
+    <mat-card class="section-card quick-reports">
+        <div class="section-header">
+            <h2>Quick Overview</h2>
+            <div class="header-filters">
+                <mat-form-field appearance="outline" class="server-selector filter-item-premium">
+                    <mat-label>Target Infrastructure</mat-label>
+                    <mat-select [(ngModel)]="selectedServerId">
+                        <mat-option *ngFor="let server of serversList" [value]="server.id">
+                            <span class="server-opt-name">{{ server.name }}</span>
+                            <span class="server-opt-ip">({{ server.ipAddress }})</span>
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix color="primary" style="margin-right: 8px;">dns</mat-icon>
+                </mat-form-field>
+
+                <div class="quick-actions">
+                    <button mat-stroked-button (click)="generateQuickReport('summary')">
+                        <mat-icon>summarize</mat-icon>
+                        Summary
+                    </button>
+                    <button mat-stroked-button (click)="generateQuickReport('performance')">
+                        <mat-icon>speed</mat-icon>
+                        Performance
+                    </button>
+                    <button mat-stroked-button (click)="generateQuickReport('security')">
+                        <mat-icon>security</mat-icon>
+                        Security
+                    </button>
+                    <button mat-stroked-button (click)="generateQuickReport('compliance')">
+                        <mat-icon>gavel</mat-icon>
+                        Compliance
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="quick-stats">
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <mat-icon>assessment</mat-icon>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ reportStats.totalReports }}</span>
+                    <span class="stat-label">Total Reports</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon" style="background: var(--warning-soft); color: var(--warning);">
+                    <mat-icon>schedule</mat-icon>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ reportStats.scheduledReports }}</span>
+                    <span class="stat-label">Scheduled Tasks</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon" style="background: var(--success-soft); color: var(--success);">
+                    <mat-icon>download</mat-icon>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ reportStats.downloadsToday }}</span>
+                    <span class="stat-label">Downloads Today</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                    <mat-icon>trending_up</mat-icon>
+                </div>
+                <div class="stat-content">
+                    <span class="stat-value">{{ reportStats.successRate }}%</span>
+                    <span class="stat-label">Success Rate</span>
+                </div>
+            </div>
+        </div>
+    </mat-card>
+
+    <!-- Report Templates Section -->
+    <mat-card class="section-card templates-section">
+        <div class="section-header">
+            <h2>Standard Templates</h2>
+            <div class="filter-group animate-fade" style="width: 320px;">
+                <mat-form-field appearance="outline" class="template-filter filter-item-compact">
+                    <mat-icon matPrefix color="primary">search</mat-icon>
+                    <input matInput (keyup)="filterTemplates($any($event.target).value)"
+                        placeholder="Search templates (Name or Category)..." aria-label="Search report templates">
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="templates-grid">
+            <div *ngFor="let template of filteredTemplates" class="template-card" (click)="useTemplate(template)">
+                <div class="template-header">
+                    <mat-icon [ngClass]="template.category">{{ getTemplateIcon(template.category) }}</mat-icon>
+                    <div class="template-info">
+                        <h4>{{ template.name }}</h4>
+                        <p>{{ template.description }}</p>
+                    </div>
+                    <div class="template-badge">{{ template.category }}</div>
+                </div>
+                <div class="template-features">
+                    <span class="feature-tag" *ngFor="let feature of template.features">
+                        <mat-icon style="font-size: 14px; width: 14px; height: 14px;">check_circle</mat-icon>
+                        {{ feature }}
+                    </span>
+                </div>
+                <div class="template-actions">
+                    <button mat-stroked-button (click)="previewTemplate(template); $event.stopPropagation()">
+                        Preview
+                    </button>
+                    <button mat-flat-button color="primary" (click)="useTemplate(template); $event.stopPropagation()">
+                        Generate
+                    </button>
+                </div>
+            </div>
+        </div>
+    </mat-card>
+
+    <!-- Reports Table Section -->
+    <mat-card class="section-card reports-table">
+        <div class="section-header">
+            <h2>Historical Archives</h2>
+            <div class="table-controls filter-group animate-fade">
+                <mat-form-field appearance="outline" class="filter-item-compact">
+                    <mat-icon matPrefix color="primary">filter_list</mat-icon>
+                    <mat-select [(value)]="statusFilter" (selectionChange)="filterReports()"
+                        aria-label="Filter by status">
+                        <mat-option value="all">All Statuses</mat-option>
+                        <mat-option value="completed">Completed</mat-option>
+                        <mat-option value="processing">Processing</mat-option>
+                        <mat-option value="failed">Failed</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-item-compact">
+                    <mat-icon matPrefix color="primary">category</mat-icon>
+                    <mat-select [(value)]="typeFilter" (selectionChange)="filterReports()" aria-label="Filter by type">
+                        <mat-option value="all">All Types</mat-option>
+                        <mat-option value="summary">Summary</mat-option>
+                        <mat-option value="performance">Performance</mat-option>
+                        <mat-option value="security">Security</mat-option>
+                        <mat-option value="compliance">Compliance</mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <button mat-button class="refresh-btn" (click)="refreshReports()" matTooltip="Sync Archives">
+                    <mat-icon [class.rotating]="loading">sync</mat-icon>
+                    <span class="hide-mobile">Sync Engine</span>
+                </button>
+            </div>
+        </div>
+
+        <app-table [data]="filteredReports" [columns]="columns" [loading]="loading" [totalCount]="totalCount"
+            [pageSize]="pageSize" (page)="onPageChange($event)">
+
+            <ng-template #cellTemplate let-element let-key="key">
+                <ng-container [ngSwitch]="key">
+                    <div *ngSwitchCase="'reportName'" class="report-name-cell">
+                        <mat-icon color="primary">assessment</mat-icon>
+                        <div class="report-info">
+                            <span class="report-title">{{ element.title }}</span>
+                            <span class="report-description" *ngIf="element.description">{{ element.description
+                                }}</span>
+                        </div>
+                    </div>
+
+                    <div *ngSwitchCase="'status'" class="status-cell">
+                        <div class="status-indicator">
+                            <mat-icon [ngClass]="element.status.toLowerCase()">{{ getStatusIcon(element.status)
+                                }}</mat-icon>
+                            <span class="status-text">{{ element.status }}</span>
+                        </div>
+                        <div class="status-progress" *ngIf="element.status === 'Processing'">
+                            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                        </div>
+                    </div>
+
+                    <div *ngSwitchCase="'size'" class="size-cell">
+                        <span>{{ formatBytes(element.fileSizeBytes) }}</span>
+                    </div>
+
+                    <div *ngSwitchCase="'createdAt'" class="date-cell">
+                        <span class="date-value">{{ element.createdAt | date:'MMM dd, yyyy' }}</span>
+                        <span class="time-value">{{ element.createdAt | date:'shortTime' }}</span>
+                    </div>
+
+                    <div *ngSwitchCase="'actions'" class="actions-cell">
+                        <button mat-icon-button color="primary" (click)="downloadReport(element.id, element.title)"
+                            [disabled]="element.status !== 'Completed'" matTooltip="Download CSV">
+                            <mat-icon>download_for_offline</mat-icon>
+                        </button>
+                        <button mat-icon-button color="accent" (click)="shareReport(element.id)"
+                            [disabled]="element.status !== 'Completed'" matTooltip="Email Report">
+                            <mat-icon>send</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteReport(element.id)" matTooltip="Remove">
+                            <mat-icon>delete_sweep</mat-icon>
+                        </button>
+                    </div>
+                </ng-container>
+            </ng-template>
+
+        </app-table>
+    </mat-card>
+
+    <!-- Scheduled Reports Section -->
+    <mat-card class="section-card scheduled-reports">
+        <div class="section-header">
+            <h2>Automated Schedules</h2>
+            <button mat-flat-button color="primary" (click)="openScheduleDialog()">
+                <mat-icon>add</mat-icon>
+                New Schedule
+            </button>
+        </div>
+        <div class="scheduled-list">
+            <div *ngFor="let schedule of scheduledReports" class="schedule-item">
+                <div class="schedule-info">
+                    <div class="schedule-header">
+                        <h4>{{ schedule.name }}</h4>
+                        <span class="frequency-indicator" [matTooltip]="schedule.cronExpression">
+                            <mat-icon>timer</mat-icon>
+                            {{ getFrequencyLabel(schedule.cronExpression) }}
+                        </span>
+                    </div>
+                    <p class="schedule-description">{{ schedule.description }}</p>
+
+                    <div class="schedule-meta-grid">
+                        <div class="meta-card">
+                            <mat-icon class="meta-icon node">dns</mat-icon>
+                            <div class="meta-content">
+                                <span class="meta-label">Target Node</span>
+                                <span class="meta-value">{{ schedule.serverName }}</span>
+                            </div>
+                        </div>
+                        <div class="meta-card">
+                            <mat-icon class="meta-icon next">event_upcoming</mat-icon>
+                            <div class="meta-content">
+                                <span class="meta-label">Next Execution</span>
+                                <span class="meta-value">{{ schedule.nextRunAt | date:'MMM d, h:mm a' }}</span>
+                            </div>
+                        </div>
+                        <div class="meta-card">
+                            <mat-icon class="meta-icon mail">alternate_email</mat-icon>
+                            <div class="meta-content">
+                                <span class="meta-label">Recipients</span>
+                                <span class="meta-value" [matTooltip]="schedule.recipients">{{ schedule.recipients
+                                    }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="schedule-actions">
+                    <div class="premium-button-group">
+                        <button mat-button (click)="editSchedule(schedule.id)">
+                            <mat-icon>edit_note</mat-icon>
+                            Edit
+                        </button>
+                        <button mat-button (click)="pauseSchedule(schedule.id)">
+                            <mat-icon>{{ schedule.isActive ? 'pause_circle' : 'play_circle' }}</mat-icon>
+                            {{ schedule.isActive ? 'Pause' : 'Resume' }}
+                        </button>
+                        <button mat-icon-button color="warn" class="delete-btn-premium"
+                            (click)="deleteSchedule(schedule.id)" matTooltip="Remove Schedule">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-card>
+</div>

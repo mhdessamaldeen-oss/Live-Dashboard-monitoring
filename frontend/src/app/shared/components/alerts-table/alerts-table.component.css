@@ -1,0 +1,40 @@
+.table-container {
+  overflow: hidden;
+  border: 1px solid var(--border-base);
+}
+
+table {
+  width: 100%;
+  background: transparent;
+}
+
+.node-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.node-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--primary);
+}
+
+.message-cell {
+  font-weight: 500;
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  color: var(--accent);
+}

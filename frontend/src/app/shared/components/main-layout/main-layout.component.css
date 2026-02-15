@@ -1,0 +1,435 @@
+/* ============================================
+   Main Layout - Responsive Styles
+   ============================================ */
+
+/* === CONTAINER === */
+.sidenav-container {
+    height: 100vh;
+    height: 100dvh;
+    /* Dynamic viewport height for mobile */
+}
+
+/* === SIDEBAR === */
+.sidenav {
+    width: 280px !important;
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.sidenav-header {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff !important;
+}
+
+.sidenav-header mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    color: var(--accent);
+}
+
+.sidenav-header span {
+    font-weight: 900;
+    font-size: 18px;
+    letter-spacing: -0.04em;
+    text-transform: uppercase;
+}
+
+.mat-nav-list {
+    padding-top: 24px !important;
+}
+
+/* === TOOLBAR === */
+.main-toolbar {
+    background-color: var(--bg-surface) !important;
+    border-bottom: 1px solid var(--border-base);
+    color: var(--text-hero) !important;
+    padding: 0 24px !important;
+    height: 64px !important;
+    display: flex;
+    align-items: center;
+}
+
+.spacer {
+    flex: 1 1 auto;
+}
+
+.toolbar-action {
+    margin-right: 8px !important;
+    color: var(--text-muted) !important;
+}
+
+/* === CONTENT === */
+.content-wrapper {
+    padding: clamp(16px, 4vw, 40px);
+    background-color: var(--bg-main);
+    min-height: calc(100vh - 64px);
+    min-height: calc(100dvh - 64px);
+}
+
+/* === USER MENU === */
+.user-menu {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 10px;
+    transition: background-color 0.2s;
+    border: 1px solid var(--border-base);
+}
+
+.user-menu:hover {
+    background-color: var(--bg-main);
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-hero);
+}
+
+/* === SYSTEM STATUS === */
+.system-pulse {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    margin-right: 8px;
+    border-right: 1px solid var(--border-base);
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-muted);
+    border-radius: 50%;
+    position: relative;
+    transition: background-color 0.3s var(--ease);
+    flex-shrink: 0;
+}
+
+.pulse-dot.connected {
+    background-color: var(--success);
+}
+
+.pulse-dot.connecting {
+    background-color: var(--warning);
+}
+
+.pulse-dot::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: inherit;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    70% {
+        transform: scale(3);
+        opacity: 0;
+    }
+
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
+
+.pulse-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-hero);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+/* Material Icons Fix */
+mat-icon,
+.mat-icon {
+    font-family: 'Material Icons' !important;
+}
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Tablet (< 1024px) */
+@media (max-width: 1024px) {
+    .sidenav {
+        width: 240px;
+    }
+
+    .main-toolbar {
+        padding: 0 16px !important;
+    }
+
+    .content-wrapper {
+        padding: 24px;
+    }
+
+    .system-pulse {
+        padding: 0 12px;
+        margin-right: 4px;
+    }
+
+    .pulse-label {
+        display: none;
+    }
+}
+
+/* Mobile (< 768px) */
+@media (max-width: 768px) {
+    .sidenav {
+        width: 260px;
+    }
+
+    .main-toolbar {
+        padding: 0 12px !important;
+        height: 56px !important;
+    }
+
+    .content-wrapper {
+        padding: 16px;
+        min-height: calc(100vh - 56px);
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .system-pulse {
+        padding: 0 8px;
+        margin-right: 0;
+        border-right: none;
+    }
+
+    .toolbar-action {
+        margin-right: 4px !important;
+    }
+}
+
+/* Small Mobile (< 480px) */
+@media (max-width: 480px) {
+    .sidenav-header {
+        padding: 16px;
+    }
+
+    .sidenav-header span {
+        font-size: 16px;
+    }
+
+    .content-wrapper {
+        padding: 12px;
+    }
+
+    .main-toolbar {
+        padding: 0 8px !important;
+    }
+}
+
+/* === NOTIFICATION MENU === */
+::ng-deep .notification-menu {
+    min-width: 320px !important;
+    max-width: 360px !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.menu-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-base);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--bg-surface);
+}
+
+.menu-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-hero);
+}
+
+.view-all-link {
+    font-size: 12px;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.view-all-link:hover {
+    text-decoration: underline;
+}
+
+.empty-state {
+    padding: 32px;
+    text-align: center;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.empty-state mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    opacity: 0.3;
+}
+
+.notification-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    height: auto !important;
+    padding: 12px 16px !important;
+    border-bottom: 1px solid var(--border-base);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.notification-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+}
+
+.severity-indicator {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.severity-indicator.critical {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.severity-indicator.warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.severity-indicator.info {
+    background: var(--info-soft);
+    color: var(--info);
+}
+
+.notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.dot-separator {
+    font-weight: 900;
+    opacity: 0.5;
+}
+
+/* === DATA SOURCE DROPDOWN === */
+::ng-deep .datasource-menu {
+    min-width: 280px !important;
+    border-radius: 12px !important;
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.mode-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.mode-badge.mock {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.mode-badge.live {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.active-option {
+    background: var(--primary-soft) !important;
+    border-left: 3px solid var(--primary) !important;
+}
+
+.option-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.option-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-hero);
+}
+
+.option-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+}

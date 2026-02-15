@@ -1,0 +1,80 @@
+<div class="dialog-wrapper">
+    <h2 mat-dialog-title class="gradient-text">{{ isEditMode ? 'Authorize Role Capabilities' : 'Define New System Role'
+        }}</h2>
+
+    <mat-dialog-content class="dialog-content">
+        <form [formGroup]="roleForm" class="dialog-form">
+            <div class="role-meta" *ngIf="!isEditMode">
+                <mat-form-field appearance="outline" class="premium-field">
+                    <mat-label>Role Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Audit Specialist">
+                    <mat-icon matPrefix color="primary">badge</mat-icon>
+                    <mat-error *ngIf="roleForm.get('name')?.hasError('required')">Role name is mandatory</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="premium-field">
+                    <mat-label>Description</mat-label>
+                    <input matInput formControlName="description" placeholder="Responsible for system audits">
+                    <mat-icon matPrefix color="primary">description</mat-icon>
+                </mat-form-field>
+            </div>
+
+            <div class="permissions-hub">
+                <div class="section-header">
+                    <mat-icon>security</mat-icon>
+                    <span>Permissions Matrix</span>
+                    <div class="spacer"></div>
+                    <span class="count-badge" *ngIf="!loading">{{ selectedPermissionIds.size }} Active</span>
+                </div>
+
+                <div *ngIf="loading" class="loading-shade">
+                    <mat-spinner diameter="40"></mat-spinner>
+                </div>
+
+                <div class="permissions-scroll" *ngIf="!loading">
+                    <mat-accordion multi>
+                        <mat-expansion-panel *ngFor="let group of permissionGroups" class="group-panel"
+                            [expanded]="true">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    <mat-checkbox [checked]="group.isSelected" [indeterminate]="group.isIndeterminate"
+                                        (click)="$event.stopPropagation()" (change)="toggleGroup(group)" color="primary"
+                                        style="margin-right: 12px;">
+                                    </mat-checkbox>
+                                    <span class="group-name">{{ group.name }}</span>
+                                </mat-panel-title>
+                                <mat-panel-description>
+                                    {{ getSelectedCount(group) }} / {{ group.permissions.length }} assigned
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+
+                            <div class="permissions-grid">
+                                <div *ngFor="let perm of group.permissions" class="perm-card"
+                                    [class.selected]="isPermissionSelected(perm.id)"
+                                    (click)="togglePermission(perm.id)">
+                                    <div class="perm-header">
+                                        <mat-checkbox [checked]="isPermissionSelected(perm.id)"
+                                            (click)="$event.stopPropagation()" (change)="togglePermission(perm.id)"
+                                            color="primary">
+                                        </mat-checkbox>
+                                        <span class="perm-title">{{ getShortName(perm.name) }}</span>
+                                    </div>
+                                    <p class="perm-info">{{ perm.description }}</p>
+                                </div>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+                </div>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" class="dialog-actions">
+        <button mat-button mat-dialog-close>Cancel</button>
+        <button mat-flat-button color="primary" [disabled]="roleForm.invalid || loading" (click)="onSubmit()"
+            class="submit-btn premium-btn">
+            <mat-icon style="margin-right: 8px;">{{ isEditMode ? 'shield_moon' : 'add_moderator' }}</mat-icon>
+            <span>{{ isEditMode ? 'Apply Updates' : 'Create Custom Role' }}</span>
+        </button>
+    </mat-dialog-actions>
+</div>

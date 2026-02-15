@@ -1,0 +1,62 @@
+<div class="page-container animate-fade">
+    <div class="page-header">
+        <div>
+            <h1 class="gradient-text">Background Infrastructure</h1>
+            <p>Monitor and orchestrate automated system tasks</p>
+        </div>
+        <div class="header-actions">
+            <div class="filter-group">
+                <a mat-button [href]="hangfireUrl" target="_blank" class="dashboard-link-btn"
+                    matTooltip="Open advanced engine dashboard">
+                    <mat-icon>dashboard</mat-icon>
+                    <span class="hide-mobile">Engine Dashboard</span>
+                </a>
+                <button mat-button class="refresh-btn" (click)="loadJobs()">
+                    <mat-icon [class.rotating]="loading">sync</mat-icon>
+                    <span class="hide-mobile">Sync Engine</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="glass-panel table-wrapper">
+        <app-table [data]="jobs" [columns]="columns" [showPaginator]="false" [loading]="loading"
+            (sort)="onSortChange($event)">
+            <ng-template #cellTemplate let-job let-key="key">
+                <ng-container [ngSwitch]="key">
+                    <div *ngSwitchCase="'name'" class="job-name">
+                        <div class="task-icon-wrapper">
+                            <mat-icon>settings_backup_restore</mat-icon>
+                        </div>
+                        <div class="job-info">
+                            <span class="primary-text">{{ job.name }}</span>
+                            <span class="secondary-text">Engine: system-cron-v1</span>
+                        </div>
+                    </div>
+
+                    <div *ngSwitchCase="'status'">
+                        <span class="status-pill active">{{ job.status }}</span>
+                    </div>
+
+                    <div *ngSwitchCase="'cronExpression'">
+                        <code class="cron-tag">{{ job.cronExpression }}</code>
+                    </div>
+
+                    <div *ngSwitchCase="'lastRun'">
+                        <span class="time-stamp">
+                            <mat-icon>history</mat-icon>
+                            {{ job.lastRun ? (job.lastRun | date:'MMM dd, HH:mm:ss') : 'Never' }}
+                        </span>
+                    </div>
+
+                    <div *ngSwitchCase="'nextRun'">
+                        <span class="time-stamp highlight">
+                            <mat-icon>schedule</mat-icon>
+                            {{ job.nextRun | date:'MMM dd, HH:mm:ss' }}
+                        </span>
+                    </div>
+                </ng-container>
+            </ng-template>
+        </app-table>
+    </div>
+</div>

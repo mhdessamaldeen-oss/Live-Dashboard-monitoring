@@ -1,0 +1,50 @@
+<div class="tab-content-wrapper animate-reveal" style="padding: 24px;">
+    <div class="tab-actions" style="display: flex; justify-content: flex-end; margin-bottom: 24px;">
+        <button *ngIf="authService.isAdmin()" mat-flat-button color="primary" (click)="openRoleDialog()">
+            <mat-icon>add_moderator</mat-icon>
+            Create Role
+        </button>
+    </div>
+
+    <div class="glass-panel table-wrapper">
+        <div *ngIf="loading" class="loading-shade"
+            style="padding: 100px; display: flex; justify-content: center; background: rgba(0,0,0,0.05);">
+            <mat-spinner diameter="48"></mat-spinner>
+        </div>
+
+        <app-table *ngIf="!loading" [data]="roles" [columns]="columns" [showPaginator]="false">
+            <ng-template #cellTemplate let-role let-key="key">
+                <ng-container [ngSwitch]="key">
+                    <div *ngSwitchCase="'name'" class="name-cell">
+                        <span class="role-name">{{ role.name }}</span>
+                    </div>
+
+                    <div *ngSwitchCase="'description'">
+                        <span class="text-muted">{{ role.description }}</span>
+                    </div>
+
+                    <div *ngSwitchCase="'permissions'">
+                        <div class="permission-chips">
+                            <mat-chip-set>
+                                <mat-chip *ngFor="let perm of role.permissions.slice(0, 3)">{{ perm.name }}</mat-chip>
+                                <mat-chip *ngIf="role.permissions.length > 3">+{{ role.permissions.length - 3 }}
+                                    more</mat-chip>
+                            </mat-chip-set>
+                        </div>
+                    </div>
+
+                    <div *ngSwitchCase="'actions'">
+                        <button mat-icon-button color="primary" (click)="openRoleDialog(role)"
+                            *ngIf="authService.isAdmin()">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="deleteRole(role)"
+                            *ngIf="authService.isAdmin() && role.name !== 'Admin' && role.name !== 'User'">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </ng-container>
+            </ng-template>
+        </app-table>
+    </div>
+</div>

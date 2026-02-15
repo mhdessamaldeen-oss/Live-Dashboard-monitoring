@@ -1,0 +1,90 @@
+# ──────────────────────────────────────────────────
+# GAMA Monitoring Dashboard — PRODUCTION
+# ──────────────────────────────────────────────────
+# Usage:
+#   docker-compose -f docker-compose.prod.yml up -d
+# ──────────────────────────────────────────────────
+
+services:
+  # ─── SQL Server ───────────────────────────────
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: gama-sqlserver-prod
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD:-YourStrong!Passw0rd}
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_prod_data:/var/opt/mssql
+    networks:
+      - gama-network
+    restart: unless-stopped
+
+  # ─── Redis Cache ──────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: gama-redis-prod
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - gama-network
+    restart: unless-stopped
+
+  # ─── Backend API (From Docker Hub) ──────────
+  backend:
+    image: ${DOCKER_USERNAME}/monitoring-backend:latest
+    container_name: gama-backend-prod
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=GamaMonitoring;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=true
+      - ConnectionStrings__Redis=redis:6379
+    ports:
+      - "5000:8080"
+    depends_on:
+      - sqlserver
+      - redis
+    volumes:
+      - reports_prod_data:/app/App_Data/reports
+    networks:
+      - gama-network
+    restart: unless-stopped
+
+  # ─── Redis UI ───────────────────────────────
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: gama-redis-commander-prod
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - gama-network
+    restart: unless-stopped
+
+  # ─── Frontend (From Docker Hub) ─────────────
+  frontend:
+    image: ${DOCKER_USERNAME}/monitoring-frontend:latest
+    container_name: gama-frontend-prod
+    ports:
+      - "8085:80"
+    depends_on:
+      - backend
+    networks:
+      - gama-network
+    restart: unless-stopped
+
+volumes:
+  sqlserver_prod_data:
+  redis_prod_data:
+  reports_prod_data:
+
+
+networks:
+  gama-network:
+    driver: bridge

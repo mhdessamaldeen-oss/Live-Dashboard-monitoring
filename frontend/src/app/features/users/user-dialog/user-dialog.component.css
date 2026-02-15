@@ -1,0 +1,83 @@
+.dialog-wrapper {
+    background: var(--bg-surface);
+    margin: -24px;
+    padding: 24px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-base);
+}
+
+.dialog-content {
+    padding: 24px 0 !important;
+}
+
+.dialog-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.error-banner {
+    background: var(--danger-soft);
+    border-left: 4px solid var(--danger);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--danger);
+}
+
+.status-toggle {
+    padding: 16px;
+    background: var(--bg-main);
+    border-radius: 12px;
+    border: 1px solid var(--border-base);
+}
+
+.text-success {
+    color: var(--success);
+    font-weight: 700;
+}
+
+.text-danger {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.role-option {
+    display: flex;
+    align-items: center;
+    color: var(--text-main);
+}
+
+.submit-btn {
+    height: var(--control-height) !important;
+    border-radius: var(--control-radius) !important;
+    font-weight: 700;
+    min-width: 180px;
+}
+
+/* Theme-aware Field Refinement */
+:host ::ng-deep .dark-field .mat-mdc-form-field-flex {
+    background: var(--bg-main) !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+:host ::ng-deep .dark-field .mat-mdc-floating-label {
+    color: var(--text-muted) !important;
+}
+
+:host ::ng-deep .dark-field .mdc-text-field--filled:not(.mdc-text-field--disabled) .mdc-text-field__input {
+    color: var(--text-hero) !important;
+}
+
+:host ::ng-deep .dark-field mat-icon {
+    color: var(--primary) !important;
+}

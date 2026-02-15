@@ -1,0 +1,308 @@
+<div class="dashboard-container">
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- LOADING STATE                                       -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div *ngIf="serversLoading$ | async" class="loading-overlay">
+        <div class="loading-content">
+            <mat-spinner diameter="48"></mat-spinner>
+            <p class="loading-text">Loading monitoring data...</p>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- DASHBOARD CONTENT                                   -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div *ngIf="!(serversLoading$ | async)" class="dashboard-content animate-fade">
+
+        <!-- Page Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <h1 class="page-title">
+                    <mat-icon class="title-icon">monitoring</mat-icon>
+                    Monitoring Dashboard
+                </h1>
+                <p class="page-subtitle">Real-time system monitoring and analytics</p>
+            </div>
+            <div class="header-right">
+                <div class="connection-badge" [ngClass]="connectionStatus">
+                    <span class="connection-dot"></span>
+                    <span class="connection-label">
+                        {{ connectionStatus === 'connected' ? 'Live' :
+                        connectionStatus === 'connecting' ? 'Connecting...' : 'Offline' }}
+                    </span>
+                </div>
+                <button mat-flat-button color="primary" (click)="refresh()" class="refresh-btn"
+                    matTooltip="Refresh all data" aria-label="Refresh dashboard">
+                    <mat-icon>refresh</mat-icon>
+                    Refresh
+                </button>
+            </div>
+        </header>
+
+        <!-- ─── Summary Stat Cards ─── -->
+        <section class="stats-row" aria-label="Server statistics summary">
+            <app-stat-card label="Total Servers" [value]="totalServers.toString()" icon="dns"
+                iconBg="rgba(99, 102, 241, 0.12)" iconColor="#6366f1">
+            </app-stat-card>
+            <app-stat-card label="Online" [value]="onlineServers.toString()" icon="check_circle"
+                iconBg="rgba(34, 197, 94, 0.12)" iconColor="#22c55e">
+            </app-stat-card>
+            <app-stat-card label="Critical" [value]="criticalServers.toString()" icon="error"
+                iconBg="rgba(239, 68, 68, 0.12)" iconColor="#ef4444">
+            </app-stat-card>
+            <app-stat-card label="Active Alerts" [value]="(alertSummary?.activeAlerts ?? 0).toString()"
+                icon="notification_important" iconBg="rgba(245, 158, 11, 0.12)" iconColor="#f59e0b">
+            </app-stat-card>
+        </section>
+
+        <!-- ─── Main Grid: Servers + Live Metrics ─── -->
+        <div class="main-grid">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- SERVER LIST PANEL                           -->
+            <!-- ═══════════════════════════════════════════ -->
+            <mat-card class="panel servers-panel" aria-label="Server list">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <mat-icon>dns</mat-icon>
+                        Servers
+                    </h2>
+                    <div class="filter-group animate-fade">
+                        <mat-form-field appearance="outline" class="filter-field filter-item-compact">
+                            <mat-icon matPrefix color="primary">dns</mat-icon>
+                            <mat-select (selectionChange)="filterServers($event.value)" [value]="serverFilter"
+                                aria-label="Filter servers by status">
+                                <mat-option value="all">All Servers</mat-option>
+                                <mat-option value="online">Online</mat-option>
+                                <mat-option value="warning">Warning</mat-option>
+                                <mat-option value="critical">Critical</mat-option>
+                                <mat-option value="offline">Offline</mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <div class="servers-list">
+                    <!-- Empty State -->
+                    <div *ngIf="filteredServers.length === 0" class="empty-state">
+                        <mat-icon>dns</mat-icon>
+                        <p>No servers found</p>
+                        <small>Adjust the filter or connect servers to start monitoring</small>
+                    </div>
+
+                    <!-- Server Items -->
+                    <div *ngFor="let server of filteredServers; trackBy: trackByServerId" class="server-card"
+                        [ngClass]="getStatusClass(server.status)" [class.selected]="server.id === selectedServerId"
+                        (click)="selectServer(server.id)" role="button" tabindex="0"
+                        [attr.aria-label]="'Select server ' + server.name + ', status: ' + server.status"
+                        (keydown.enter)="selectServer(server.id)"
+                        (keydown.space)="selectServer(server.id); $event.preventDefault()">
+
+                        <div class="server-card-top">
+                            <div class="server-identity">
+                                <span class="server-name">
+                                    {{ server.name.replace('[HOST] ', '') }}
+                                    <mat-chip *ngIf="server.isHost" class="host-chip-mini">HOST</mat-chip>
+                                </span>
+                                <span class="server-host">{{ server.hostName }}</span>
+                            </div>
+                            <div class="status-badge" [ngClass]="getStatusClass(server.status)">
+                                <mat-icon>{{ getStatusIcon(server.status) }}</mat-icon>
+                            </div>
+                        </div>
+
+                        <div class="server-card-content">
+                            <!-- Metrics removed for a cleaner card view as requested -->
+                        </div>
+
+                        <div class="server-card-footer">
+                            <button mat-button class="details-link"
+                                (click)="navigateToServer(server.id); $event.stopPropagation()">
+                                <mat-icon>open_in_new</mat-icon>
+                                Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- LIVE METRICS PANEL                          -->
+            <!-- ═══════════════════════════════════════════ -->
+            <mat-card class="panel metrics-panel" aria-label="Live server metrics">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <mat-icon>speed</mat-icon>
+                        Live Metrics
+                    </h2>
+                    <div class="metrics-header-info">
+                        <mat-chip-set aria-label="Selected server">
+                            <mat-chip highlighted>
+                                <mat-icon matChipAvatar>computer</mat-icon>
+                                {{ selectedServerName }}
+                            </mat-chip>
+                        </mat-chip-set>
+                        <span class="last-update" *ngIf="selectedServerMetrics">
+                            <mat-icon>schedule</mat-icon>
+                            {{ getLastUpdateDisplay() }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Server Toggle Buttons -->
+                <div class="server-toggles" *ngIf="servers.length > 0">
+                    <mat-button-toggle-group [value]="selectedServerId" (change)="onServerChange($event.value)"
+                        aria-label="Select server for live metrics">
+                        <mat-button-toggle *ngFor="let server of servers; trackBy: trackByServerId" [value]="server.id">
+                            <mat-icon class="toggle-icon" [ngClass]="getStatusClass(server.status)">
+                                {{ getStatusIcon(server.status) }}
+                            </mat-icon>
+                            {{ server.name.replace('[HOST] ', '') }}
+                            <mat-chip *ngIf="server.isHost" class="host-chip-mini">HOST</mat-chip>
+                        </mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+
+                <!-- Metrics Loading -->
+                <div *ngIf="metricsLoading" class="metrics-loading">
+                    <mat-spinner diameter="32"></mat-spinner>
+                    <span>Loading metrics...</span>
+                </div>
+
+                <!-- No Server Selected -->
+                <div *ngIf="!selectedServerId && !metricsLoading" class="empty-state compact">
+                    <mat-icon>trending_up</mat-icon>
+                    <p>Select a server to view live metrics</p>
+                </div>
+
+                <!-- Live Charts Grid -->
+                <div *ngIf="selectedServerId && !metricsLoading" class="charts-grid">
+                    <!-- CPU Gauge -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">CPU Usage</h3>
+                        <apx-chart [series]="cpuGaugeOptions.series" [chart]="cpuGaugeOptions.chart"
+                            [plotOptions]="cpuGaugeOptions.plotOptions" [labels]="cpuGaugeOptions.labels"
+                            [colors]="cpuGaugeOptions.colors">
+                        </apx-chart>
+                    </div>
+
+                    <!-- Memory Gauge -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Memory Usage</h3>
+                        <apx-chart [series]="memGaugeOptions.series" [chart]="memGaugeOptions.chart"
+                            [plotOptions]="memGaugeOptions.plotOptions" [labels]="memGaugeOptions.labels"
+                            [colors]="memGaugeOptions.colors">
+                        </apx-chart>
+                    </div>
+
+                    <!-- Disk Gauge -->
+                    <div class="chart-card">
+                        <h3 class="chart-title">Disk Usage</h3>
+                        <apx-chart [series]="diskGaugeOptions.series" [chart]="diskGaugeOptions.chart"
+                            [plotOptions]="diskGaugeOptions.plotOptions" [labels]="diskGaugeOptions.labels"
+                            [colors]="diskGaugeOptions.colors">
+                        </apx-chart>
+                    </div>
+
+                    <!-- Network Traffic Area Chart -->
+                    <div class="chart-card chart-wide">
+                        <h3 class="chart-title">Network Traffic</h3>
+                        <apx-chart [series]="networkChartOptions.series" [chart]="networkChartOptions.chart"
+                            [xaxis]="networkChartOptions.xaxis" [yaxis]="networkChartOptions.yaxis"
+                            [stroke]="networkChartOptions.stroke" [dataLabels]="networkChartOptions.dataLabels"
+                            [fill]="networkChartOptions.fill" [colors]="networkChartOptions.colors"
+                            [tooltip]="networkChartOptions.tooltip" [legend]="networkChartOptions.legend">
+                        </apx-chart>
+                    </div>
+                </div>
+            </mat-card>
+        </div>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- ALERTS SECTION                              -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mat-card class="panel alerts-panel" aria-label="Recent alerts">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <mat-icon>notification_important</mat-icon>
+                    Recent Alerts
+                </h2>
+                <div class="alerts-header-actions">
+                    <div class="alert-count-badges" *ngIf="alertSummary">
+                        <span class="count-badge critical" matTooltip="Critical alerts">
+                            <mat-icon>error</mat-icon>
+                            {{ alertSummary.criticalAlerts }}
+                        </span>
+                        <span class="count-badge warning" matTooltip="Warning alerts">
+                            <mat-icon>warning</mat-icon>
+                            {{ alertSummary.warningAlerts }}
+                        </span>
+                        <span class="count-badge info" matTooltip="Info alerts">
+                            <mat-icon>info</mat-icon>
+                            {{ alertSummary.infoAlerts }}
+                        </span>
+                    </div>
+                    <button mat-icon-button (click)="refreshAlerts()" matTooltip="Refresh alerts"
+                        aria-label="Refresh alerts" [disabled]="alertsLoading$ | async">
+                        <mat-icon [class.spin]="alertsLoading$ | async">refresh</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <div class="alerts-content">
+                <!-- Empty State -->
+                <div *ngIf="alerts.length === 0 && !(alertsLoading$ | async)" class="empty-state">
+                    <mat-icon>verified</mat-icon>
+                    <p>No active alerts</p>
+                    <small>All systems running normally</small>
+                </div>
+
+                <!-- Alerts Loading -->
+                <div *ngIf="alertsLoading$ | async" class="metrics-loading">
+                    <mat-spinner diameter="28"></mat-spinner>
+                    <span>Refreshing alerts...</span>
+                </div>
+
+                <!-- Alert Items -->
+                <div class="alerts-list" *ngIf="alerts.length > 0 && !(alertsLoading$ | async)">
+                    <div *ngFor="let alert of alerts.slice(0, 10); trackBy: trackByAlertId" class="alert-row"
+                        [ngClass]="alert.severity.toLowerCase()">
+                        <div class="alert-severity-icon" [ngClass]="alert.severity.toLowerCase()">
+                            <mat-icon>{{ getAlertIcon(alert.severity) }}</mat-icon>
+                        </div>
+                        <div class="alert-body">
+                            <div class="alert-title">{{ alert.title }}</div>
+                            <div class="alert-message">{{ alert.message }}</div>
+                            <div class="alert-meta">
+                                <span class="alert-server-tag">
+                                    <mat-icon>dns</mat-icon>
+                                    {{ alert.serverName }}
+                                </span>
+                                <span class="alert-time">
+                                    <mat-icon>schedule</mat-icon>
+                                    {{ alert.createdAt | date:'short' }}
+                                </span>
+                                <span class="alert-status-tag" [ngClass]="alert.status.toLowerCase()">
+                                    {{ alert.status }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="alert-actions">
+                            <button mat-stroked-button color="primary" (click)="resolveAlert(alert.id)"
+                                *ngIf="alert.status === 'Active'" matTooltip="Acknowledge this alert"
+                                aria-label="Resolve alert">
+                                <mat-icon>done</mat-icon>
+                                Resolve
+                            </button>
+                            <mat-chip *ngIf="alert.status !== 'Active'" class="resolved-chip">
+                                <mat-icon matChipAvatar>verified</mat-icon>
+                                {{ alert.status }}
+                            </mat-chip>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </mat-card>
+
+    </div>
+</div>

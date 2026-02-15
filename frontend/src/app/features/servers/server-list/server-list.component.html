@@ -1,0 +1,90 @@
+<div class="page-container animate-fade">
+    <div class="page-header">
+        <div>
+            <h1 class="gradient-text">Infrastructure Overview</h1>
+            <p>Monitor and manage your distributed computing nodes</p>
+        </div>
+        <button *ngIf="authService.isAdmin()" mat-flat-button color="primary" (click)="provisionServer()">
+            <mat-icon style="margin-right: 8px;">add_circle</mat-icon>
+            Provision New Node
+        </button>
+    </div>
+
+    <div class="filter-card animate-fade" style="margin-bottom: 24px;">
+        <div class="filter-group">
+            <mat-form-field appearance="outline" class="search-field" style="flex: 1; max-width: none;"
+                subsys="no-subscript">
+                <mat-icon matPrefix color="primary">search</mat-icon>
+                <input matInput [(ngModel)]="searchTerm" (keyup.enter)="applyFilter()"
+                    placeholder="Search Infrastructure Inventory (Name, Host, IP)..." aria-label="Search servers">
+                @if (searchTerm) {
+                <button mat-icon-button matSuffix (click)="searchTerm = ''; applyFilter()" matTooltip="Clear Search">
+                    <mat-icon>close</mat-icon>
+                </button>
+                }
+            </mat-form-field>
+
+            <button mat-button (click)="applyFilter()" class="refresh-btn">
+                <mat-icon>filter_alt</mat-icon>
+                Refine Search
+            </button>
+        </div>
+    </div>
+
+    <mat-card class="table-card section-card">
+        <app-table [data]="servers" [columns]="columns" [loading]="loading" [totalCount]="totalCount"
+            [pageSize]="pageSize" (page)="onPageChange($event)" (sort)="onSortChange($event)">
+
+            <ng-template #cellTemplate let-element let-key="key">
+                <ng-container [ngSwitch]="key">
+                    <div *ngSwitchCase="'name'" class="server-node">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <a [routerLink]="['/servers', element.id]" class="server-name">{{
+                                element.name.replace('[HOST] ', '') }}</a>
+                            <mat-chip-set *ngIf="element.isHost">
+                                <mat-chip
+                                    style="min-height: 20px; height: 20px; padding: 0 8px; font-size: 10px; font-weight: 700; background: var(--primary); color: white;">HOST</mat-chip>
+                            </mat-chip-set>
+                        </div>
+                        <span class="server-host">{{ element.hostName }}</span>
+                    </div>
+
+                    <div *ngSwitchCase="'ipAddress'" style="display: flex; align-items: center; gap: 8px;">
+                        <code
+                            style="font-family: var(--font-mono); font-size: 13px; background: var(--bg-main); padding: 2px 8px; border-radius: 6px; border: 1px solid var(--border-base);">{{
+                            element.ipAddress }}</code>
+                        <button mat-icon-button [cdkCopyToClipboard]="element.ipAddress"
+                            (click)="copyIp(element.ipAddress)" matTooltip="Copy IP Address">
+                            <mat-icon style="font-size: 16px; width: 16px; height: 16px;">content_copy</mat-icon>
+                        </button>
+                    </div>
+
+                    <span *ngSwitchCase="'status'" class="status-pill"
+                        [class]="(element.status || 'unknown').toLowerCase()">
+                        {{ element.status || 'Unknown' }}
+                    </span>
+
+                    <div *ngSwitchCase="'actions'" style="text-align: right;">
+                        <button mat-icon-button [routerLink]="['/servers', element.id]" matTooltip="Detailed Analytics">
+                            <mat-icon color="primary" style="font-size: 20px;">analytics</mat-icon>
+                        </button>
+                        <button mat-icon-button [matMenuTriggerFor]="serverMenu">
+                            <mat-icon style="font-size: 20px; color: var(--text-muted);">more_vert</mat-icon>
+                        </button>
+                        <mat-menu #serverMenu="matMenu">
+                            <button mat-menu-item (click)="editServer(element)">
+                                <mat-icon>edit</mat-icon>
+                                <span>Configure</span>
+                            </button>
+                            <button mat-menu-item (click)="deleteServer(element.id)">
+                                <mat-icon color="warn">delete</mat-icon>
+                                <span style="color: var(--danger)">Remove node</span>
+                            </button>
+                        </mat-menu>
+                    </div>
+                </ng-container>
+            </ng-template>
+
+        </app-table>
+    </mat-card>
+</div>

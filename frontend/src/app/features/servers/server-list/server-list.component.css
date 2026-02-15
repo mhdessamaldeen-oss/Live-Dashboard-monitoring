@@ -1,0 +1,81 @@
+.filter-card {
+    margin-bottom: 24px;
+}
+
+.search-field {
+    width: 100%;
+}
+
+.table-card {
+    position: relative;
+    border: 1px solid var(--border-base) !important;
+    overflow: hidden;
+}
+
+.loading-shade {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: var(--bg-glass);
+    backdrop-filter: blur(8px);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Column Standardized Widths */
+.mat-column-nodeName {
+    width: 350px;
+}
+
+.mat-column-ipAddress {
+    width: 220px;
+}
+
+.mat-column-os {
+    width: 220px;
+}
+
+.mat-column-location {
+    width: 240px;
+}
+
+.mat-column-status {
+    width: 180px;
+}
+
+.mat-column-actions {
+    width: 140px;
+    text-align: right;
+    padding-right: 40px !important;
+}
+
+.server-node {
+    display: flex;
+    flex-direction: column;
+}
+
+.server-name {
+    font-weight: 800;
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 17px;
+    margin-bottom: 4px;
+}
+
+.server-name:hover {
+    color: var(--primary-dark);
+}
+
+.server-host {
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+}

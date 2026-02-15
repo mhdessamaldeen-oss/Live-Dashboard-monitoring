@@ -1,0 +1,167 @@
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #drawer class="sidenav" role="navigation" [mode]="(isHandset$ | async) ? 'over' : 'side'"
+        [opened]="(isHandset$ | async) === false" [fixedInViewport]="false">
+
+        <div class="sidenav-header">
+            <mat-icon>dashboard_customize</mat-icon>
+            <span>SystemMonitor</span>
+        </div>
+
+        <mat-nav-list>
+            <a mat-list-item routerLink="/" routerLinkActive="active-link" [routerLinkActiveOptions]="{exact: true}"
+                class="nav-item">
+                <mat-icon matListItemIcon>grid_view</mat-icon>
+                <span matListItemTitle>Dashboard</span>
+            </a>
+            <a mat-list-item routerLink="/servers" routerLinkActive="active-link" class="nav-item">
+                <mat-icon matListItemIcon>dns</mat-icon>
+                <span matListItemTitle>Servers</span>
+            </a>
+            <a mat-list-item routerLink="/alerts" routerLinkActive="active-link" class="nav-item">
+                <mat-icon matListItemIcon>notifications_none</mat-icon>
+                <span matListItemTitle>Alerts</span>
+            </a>
+            <a mat-list-item routerLink="/reports" routerLinkActive="active-link" class="nav-item">
+                <mat-icon matListItemIcon>equalizer</mat-icon>
+                <span matListItemTitle>Reports</span>
+            </a>
+            <a mat-list-item routerLink="/jobs" routerLinkActive="active-link" class="nav-item">
+                <mat-icon matListItemIcon>settings_backup_restore</mat-icon>
+                <span matListItemTitle>Jobs</span>
+            </a>
+            <a *ngIf="(currentUser$ | async)?.role === Roles.Admin" mat-list-item routerLink="/users"
+                routerLinkActive="active-link" class="nav-item">
+                <mat-icon matListItemIcon>manage_accounts</mat-icon>
+                <span matListItemTitle>Admin</span>
+            </a>
+        </mat-nav-list>
+
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+        <mat-toolbar class="main-toolbar">
+            <button type="button" aria-label="Toggle sidenav" mat-icon-button (click)="drawer.toggle()"
+                *ngIf="isHandset$ | async">
+                <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
+            </button>
+
+            <span class="spacer"></span>
+
+            <div class="system-pulse" [matTooltip]="'System Link: ' + (connectionStatus$ | async)">
+                <span class="pulse-dot" [class]="connectionStatus$ | async"></span>
+                <span class="pulse-label">
+                    {{ (connectionStatus$ | async) === 'connected' ? 'Link: Online' :
+                    (connectionStatus$ | async) === 'connecting' ? 'Link: Connecting...' : 'Link: Offline' }}
+                </span>
+            </div>
+
+            <!-- Data Source Dropdown -->
+            <button mat-icon-button class="toolbar-action" [matMenuTriggerFor]="dataSourceMenu"
+                [matTooltip]="'Data Source: ' + (metricsMode$ | async)">
+                <mat-icon>science</mat-icon>
+            </button>
+
+            <mat-menu #dataSourceMenu="matMenu" xPosition="before" class="datasource-menu panel-menu">
+                <div class="menu-header">
+                    <span class="menu-title">Data Source</span>
+                    <span class="mode-badge" [class.mock]="(metricsMode$ | async) === 'Mock'"
+                        [class.live]="(metricsMode$ | async) === 'System'">
+                        {{ (metricsMode$ | async) === 'System' ? '● Live' : '● Mock' }}
+                    </span>
+                </div>
+                <button mat-menu-item (click)="toggleMetricsProvider(false)"
+                    [class.active-option]="(metricsMode$ | async) === 'Mock'">
+                    <mat-icon>shuffle</mat-icon>
+                    <div class="option-content">
+                        <span class="option-title">Mock Data</span>
+                        <span class="option-desc">Simulated data for all test servers</span>
+                    </div>
+                </button>
+                <button mat-menu-item (click)="toggleMetricsProvider(true)"
+                    [class.active-option]="(metricsMode$ | async) === 'System'">
+                    <mat-icon>monitor_heart</mat-icon>
+                    <div class="option-content">
+                        <span class="option-title">Live System{{ (osPlatform$ | async) ? ' (' + (osPlatform$ | async) +
+                            ')' : '' }}</span>
+                        <span class="option-desc">{{ (isSystemSupported$ | async) ? 'Real host metrics via ' +
+                            (osPlatform$ | async)
+                            : 'Not supported — unsupported OS' }}</span>
+                    </div>
+                </button>
+            </mat-menu>
+
+            <button mat-icon-button (click)="toggleTheme()" class="toolbar-action" matTooltip="Toggle Dark Mode">
+                <mat-icon>{{ (theme$ | async) === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+
+            <button mat-icon-button class="toolbar-action" matTooltip="Recent Activity"
+                [matMenuTriggerFor]="notificationsMenu">
+                <mat-icon [matBadge]="unreadCount$ | async" matBadgeColor="warn" matBadgeSize="small"
+                    [matBadgeHidden]="(unreadCount$ | async) === 0">notifications</mat-icon>
+            </button>
+
+            <mat-menu #notificationsMenu="matMenu" xPosition="before" class="notification-menu panel-menu">
+                <div class="menu-header">
+                    <span class="menu-title">Recent Activity</span>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <button mat-button class="view-all-link" style="font-size: 12px; height: 32px; padding: 0 8px;"
+                            (click)="markAllAsRead()">Mark all read</button>
+                        <a routerLink="/alerts" class="view-all-link">View All</a>
+                    </div>
+                </div>
+
+                <ng-container *ngIf="recentAlerts$ | async as recentAlerts">
+                    <div *ngIf="recentAlerts.length === 0" class="empty-state">
+                        <mat-icon>notifications_off</mat-icon>
+                        <p>No recent alerts</p>
+                    </div>
+
+                    <div class="notification-list" *ngIf="recentAlerts.length > 0">
+                        <button mat-menu-item *ngFor="let alert of recentAlerts" routerLink="/alerts"
+                            class="notification-item">
+                            <div class="notification-content">
+                                <div class="notification-top">
+                                    <span class="notification-title">{{ alert.title }}</span>
+                                    <span class="severity-indicator" [class]="alert.severity.toLowerCase()">{{
+                                        alert.severity }}</span>
+                                </div>
+                                <div class="notification-meta">
+                                    <span>{{ alert.serverName }}</span>
+                                    <span class="dot-separator">•</span>
+                                    <span>{{ alert.createdAt | date:'MMM d, HH:mm' }}</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+                </ng-container>
+            </mat-menu>
+            <div *ngIf="currentUser$ | async as user" class="user-menu" [matMenuTriggerFor]="menu">
+                <div class="user-info">
+                    <div class="user-avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
+                    <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+                    <mat-icon
+                        style="font-size: 18px; width: 18px; height: 18px; color: var(--text-muted)">expand_more</mat-icon>
+                </div>
+
+                <mat-menu #menu="matMenu" xPosition="before" class="premium-menu">
+                    <div style="padding: 16px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="font-weight: 600; font-size: 14px;">{{ user.firstName }} {{ user.lastName }}</div>
+                        <div style="font-size: 12px; color: var(--text-muted)">{{ user.email }}</div>
+                    </div>
+                    <button mat-menu-item>
+                        <mat-icon>person_outline</mat-icon>
+                        <span>Profile Settings</span>
+                    </button>
+                    <button mat-menu-item (click)="logout()">
+                        <mat-icon>logout</mat-icon>
+                        <span>Sign Out</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </mat-toolbar>
+
+        <main class="content-wrapper animate-fade">
+            <router-outlet></router-outlet>
+        </main>
+    </mat-sidenav-content>
+</mat-sidenav-container>
