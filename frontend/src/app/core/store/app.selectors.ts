@@ -32,3 +32,8 @@ export const selectDashboardStats = createSelector(
         ];
     }
 );
+
+export const selectConnectionStatus = createSelector(
+    selectDashboard,
+    (state) => state.connectionStatus
+);

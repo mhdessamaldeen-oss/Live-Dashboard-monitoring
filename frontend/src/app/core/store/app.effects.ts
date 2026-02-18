@@ -6,11 +6,13 @@ import * as AppActions from './app.actions';
 import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 
+import { Action, Store } from '@ngrx/store';
 import { SignalRService } from '../services/signalr.service';
-import { Store } from '@ngrx/store';
 
 import { selectTheme } from './app.selectors';
 import { withLatestFrom } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class AppEffects {
@@ -19,13 +21,21 @@ export class AppEffects {
     private alertService = inject(AlertService);
     private signalRService = inject(SignalRService);
     private store = inject(Store);
+    private snackBar = inject(MatSnackBar);
+    private router = inject(Router);
 
-    syncRealtime$ = createEffect(() =>
-        this.signalRService.alerts$.pipe(
-            tap(alert => alert && this.store.dispatch(AppActions.loadDashboard())),
-            map(() => ({ type: 'NO_ACTION' }))
+    reportReady$ = createEffect(() =>
+        this.actions$.pipe(
+            ofType(AppActions.reportGenerated),
+            tap(({ reportInfo }) => {
+                this.snackBar.open(`Report "${reportInfo.reportTitle}" is ready!`, 'View', { duration: 5000 })
+                    .onAction().subscribe(() => {
+                        this.router.navigate(['/reports', reportInfo.reportId]);
+                    });
+            })
         ), { dispatch: false }
     );
+
 
     loadDashboard$ = createEffect(() =>
         this.actions$.pipe(

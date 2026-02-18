@@ -14,13 +14,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { NgApexchartsModule } from 'ng-apexcharts';
-import { Subscription, filter } from 'rxjs';
-import { Store } from '@ngrx/store';
-import { selectTheme } from '../../../core/store/app.selectors';
-import * as ServersActions from '../../../core/store/servers/servers.actions';
-import * as ServersSelectors from '../../../core/store/servers/servers.selectors';
 import * as AlertsActions from '../../../core/store/alerts/alerts.actions';
 import * as AlertsSelectors from '../../../core/store/alerts/alerts.selectors';
+import * as MetricsSelectors from '../../../core/store/metrics/metrics.selectors';
+import * as ServersActions from '../../../core/store/servers/servers.actions';
+import * as ServersSelectors from '../../../core/store/servers/servers.selectors';
+import { Store } from '@ngrx/store';
+import { selectTheme } from '../../../core/store/app.selectors';
+import * as AppSelectors from '../../../core/store/app.selectors';
+
+import { Subscription, filter, BehaviorSubject, of, switchMap } from 'rxjs';
 
 import { ServerService } from '../../../core/services/server.service';
 import { AlertService } from '../../../core/services/alert.service';
@@ -73,6 +76,11 @@ export class DashboardHomeComponent implements OnInit, OnDestroy {
     serversLoading$ = this.store.select(ServersSelectors.selectServersLoading);
     alertsLoading$ = this.store.select(AlertsSelectors.selectAlertsLoading);
     unreadAlertsCount$ = this.store.select(AlertsSelectors.selectUnreadAlertsCount);
+
+    private selectedServerIdSubject = new BehaviorSubject<number | null>(null);
+    metrics$ = this.selectedServerIdSubject.pipe(
+        switchMap(id => id ? this.store.select(MetricsSelectors.selectServerMetrics(id)) : of([]))
+    );
 
     servers: ServerDto[] = [];
     filteredServers: ServerDto[] = [];
@@ -184,28 +192,24 @@ export class DashboardHomeComponent implements OnInit, OnDestroy {
 
     private setupSignalR(): void {
         this.subscriptions.push(
-            this.signalRService.metrics$.pipe(filter(m => !!m)).subscribe(update => {
-                const metrics = update.metric;
-                if (!metrics) return;
-
-                // 1. If this is the selected server, update the live metrics panel and history
-                if (metrics.serverId === this.selectedServerId) {
-                    this.selectedServerMetrics = {
-                        id: metrics.id || 0,
-                        serverId: metrics.serverId,
-                        cpuUsage: metrics.cpuUsage ?? metrics.cpuUsagePercent ?? 0,
-                        memoryUsage: metrics.memoryUsage ?? metrics.memoryUsagePercent ?? 0,
-                        diskUsage: metrics.diskUsage ?? metrics.diskUsagePercent ?? 0,
-                        networkIn: metrics.networkIn ?? metrics.networkInBytesPerSec ?? 0,
-                        networkOut: metrics.networkOut ?? metrics.networkOutBytesPerSec ?? 0,
-                        timestamp: metrics.timestamp || new Date().toISOString()
-                    };
-                    this.metricsHistory = [this.selectedServerMetrics, ...this.metricsHistory].slice(0, 30);
-                    this.updateCharts();
-                }
-            }),
-            this.signalRService.connectionStatus$.subscribe(status => {
+            this.store.select(AppSelectors.selectConnectionStatus).subscribe(status => {
                 this.connectionStatus = status;
+            }),
+
+            // Subscribe to Metrics from Store instead of Subject for consistency
+            this.metrics$.subscribe(metrics => {
+                if (!metrics || metrics.length === 0) {
+                    this.selectedServerMetrics = null;
+                    return;
+                }
+
+                // The store has oldest first ([...existing, new])
+                // We want to slice the last few for charts
+                const history = [...metrics].slice(-30);
+                this.metricsHistory = history;
+                this.selectedServerMetrics = history[history.length - 1]; // Latest is at the end
+
+                this.updateCharts();
             })
         );
     }
@@ -294,11 +298,9 @@ export class DashboardHomeComponent implements OnInit, OnDestroy {
 
         if (this.metricsHistory.length > 0) {
             const networkInData = this.metricsHistory
-                .map(m => ({ x: new Date(m.timestamp).getTime(), y: m.networkIn || 0 }))
-                .reverse();
+                .map(m => ({ x: new Date(m.timestamp).getTime(), y: m.networkIn || 0 }));
             const networkOutData = this.metricsHistory
-                .map(m => ({ x: new Date(m.timestamp).getTime(), y: m.networkOut || 0 }))
-                .reverse();
+                .map(m => ({ x: new Date(m.timestamp).getTime(), y: m.networkOut || 0 }));
 
             this.networkChartOptions = {
                 ...this.networkChartOptions,
@@ -341,6 +343,7 @@ export class DashboardHomeComponent implements OnInit, OnDestroy {
             this.signalRService.leaveServerGroup(this.selectedServerId);
         }
         this.selectedServerId = serverId;
+        this.selectedServerIdSubject.next(serverId);
         this.signalRService.joinServerGroup(serverId);
         this.loadServerMetrics(serverId);
         if (showSnackbar) {

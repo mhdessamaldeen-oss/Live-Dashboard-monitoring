@@ -19,7 +19,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { Store } from '@ngrx/store';
 import { toggleTheme, setTheme } from '../../../core/store/app.actions';
-import { selectTheme } from '../../../core/store/app.selectors';
+import { selectTheme, selectConnectionStatus } from '../../../core/store/app.selectors';
 import * as AlertsActions from '../../../core/store/alerts/alerts.actions';
 import * as AlertsSelectors from '../../../core/store/alerts/alerts.selectors';
 import { AlertDto } from '../../../core/models/alert.models';
@@ -62,7 +62,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         );
 
     currentUser$ = this.authService.currentUser$;
-    connectionStatus$ = this.signalRService.connectionStatus$;
+    connectionStatus$ = this.store.select(selectConnectionStatus);
     theme$ = this.store.select(selectTheme);
     recentAlerts$ = this.store.select(AlertsSelectors.selectRecentAlerts);
     unreadCount$ = this.store.select(AlertsSelectors.selectUnreadAlertsCount);
@@ -82,18 +82,6 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
         // Initial alert load
         this.store.dispatch(AlertsActions.loadAlerts({ page: 1, pageSize: 5 }));
         this.store.dispatch(AlertsActions.loadAlertSummary());
-
-        // Listen for completed reports
-        this.signalRService.reportReady$.subscribe(report => {
-            if (report) {
-                this.snackBar.open(`Report "${report.reportTitle}" is ready for download`, 'View', {
-                    duration: 6000,
-                    panelClass: ['snackbar-success']
-                }).onAction().subscribe(() => {
-                    // Navigate to reports or open download
-                });
-            }
-        });
     }
 
     ngOnDestroy(): void {

@@ -10,6 +10,7 @@ export interface AppState {
         summary: AlertSummaryDto | null;
         loading: boolean;
         error: string | null;
+        connectionStatus: 'connected' | 'disconnected' | 'connecting';
     };
 }
 
@@ -20,7 +21,8 @@ export const initialState: AppState = {
         activeAlerts: [],
         summary: null,
         loading: false,
-        error: null
+        error: null,
+        connectionStatus: 'disconnected'
     }
 };
 
@@ -51,5 +53,9 @@ export const appReducer = createReducer(
     on(AppActions.loadDashboardFailure, (state, { error }) => ({
         ...state,
         dashboard: { ...state.dashboard, loading: false, error }
+    })),
+    on(AppActions.updateConnectionStatus, (state, { status }) => ({
+        ...state,
+        dashboard: { ...state.dashboard, connectionStatus: status }
     }))
 );

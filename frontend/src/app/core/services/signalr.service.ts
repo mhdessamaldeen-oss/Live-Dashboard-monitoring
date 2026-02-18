@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import * as ServersActions from '../store/servers/servers.actions';
 import * as MetricsActions from '../store/metrics/metrics.actions';
 import * as AlertsActions from '../store/alerts/alerts.actions';
+import * as AppActions from '../store/app.actions';
 
 @Injectable({
     providedIn: 'root'
@@ -14,25 +15,13 @@ import * as AlertsActions from '../store/alerts/alerts.actions';
 export class SignalRService {
     private hubConnection: signalR.HubConnection | null = null;
 
-    private metricsSubject = new BehaviorSubject<any>(null);
-    public metrics$ = this.metricsSubject.asObservable();
-
-    private alertsSubject = new BehaviorSubject<any>(null);
-    public alerts$ = this.alertsSubject.asObservable();
-
-    private reportReadySubject = new BehaviorSubject<any>(null);
-    public reportReady$ = this.reportReadySubject.asObservable();
-
-    private connectionStatusSubject = new BehaviorSubject<'connected' | 'disconnected' | 'connecting'>('disconnected');
-    public connectionStatus$ = this.connectionStatusSubject.asObservable();
-
     constructor(private authService: AuthService, private store: Store) { }
 
     public startConnection(): void {
         const token = this.authService.token;
         if (!token) return;
 
-        this.connectionStatusSubject.next('connecting');
+        this.store.dispatch(AppActions.updateConnectionStatus({ status: 'connecting' }));
 
         this.hubConnection = new signalR.HubConnectionBuilder()
             .withUrl(`${environment.hubUrl}/monitoring`, {
@@ -41,20 +30,20 @@ export class SignalRService {
             .withAutomaticReconnect()
             .build();
 
-        this.hubConnection.onreconnecting(() => this.connectionStatusSubject.next('connecting'));
-        this.hubConnection.onreconnected(() => this.connectionStatusSubject.next('connected'));
-        this.hubConnection.onclose(() => this.connectionStatusSubject.next('disconnected'));
+        this.hubConnection.onreconnecting(() => this.store.dispatch(AppActions.updateConnectionStatus({ status: 'connecting' })));
+        this.hubConnection.onreconnected(() => this.store.dispatch(AppActions.updateConnectionStatus({ status: 'connected' })));
+        this.hubConnection.onclose(() => this.store.dispatch(AppActions.updateConnectionStatus({ status: 'disconnected' })));
 
         this.hubConnection
             .start()
             .then(() => {
                 console.log('Connection started');
-                this.connectionStatusSubject.next('connected');
+                this.store.dispatch(AppActions.updateConnectionStatus({ status: 'connected' }));
                 this.joinDashboardGroup();
             })
             .catch(err => {
                 console.log('Error while starting connection: ' + err);
-                this.connectionStatusSubject.next('disconnected');
+                this.store.dispatch(AppActions.updateConnectionStatus({ status: 'disconnected' }));
             });
 
         this.registerOnEvents();
@@ -87,7 +76,7 @@ export class SignalRService {
     public stopConnection(): void {
         if (this.hubConnection) {
             this.hubConnection.stop();
-            this.connectionStatusSubject.next('disconnected');
+            this.store.dispatch(AppActions.updateConnectionStatus({ status: 'disconnected' }));
         }
     }
 
@@ -120,13 +109,10 @@ export class SignalRService {
                     timestamp: metrics.timestamp || new Date().toISOString()
                 }
             }));
-
-            this.metricsSubject.next(update);
         });
 
         this.hubConnection.on('ReceiveAlertTriggered', (alert) => {
             this.store.dispatch(AlertsActions.addAlert({ alert }));
-            this.alertsSubject.next(alert);
         });
 
         this.hubConnection.on('ReceiveAlertResolved', (alertId) => {
@@ -137,7 +123,7 @@ export class SignalRService {
         });
 
         this.hubConnection.on('ReceiveReportReady', (reportInfo) => {
-            this.reportReadySubject.next(reportInfo);
+            this.store.dispatch(AppActions.reportGenerated({ reportInfo }));
         });
     }
 }

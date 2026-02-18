@@ -14,3 +14,13 @@ export const loadDashboardFailure = createAction(
 
 export const toggleTheme = createAction('[UI] Toggle Theme');
 export const setTheme = createAction('[UI] Set Theme', props<{ theme: 'light' | 'dark' }>());
+
+export const updateConnectionStatus = createAction(
+    '[App] Update Connection Status',
+    props<{ status: 'connected' | 'disconnected' | 'connecting' }>()
+);
+
+export const reportGenerated = createAction(
+    '[Dashboard] Report Generated',
+    props<{ reportInfo: any }>()
+);

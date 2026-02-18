@@ -24,6 +24,8 @@ import { PageEvent } from '@angular/material/paginator';
 import { AppTableComponent, AppTableColumn } from '../../../shared/components/app-table/app-table.component';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { Actions, ofType } from '@ngrx/effects';
+import * as AppActions from '../../../core/store/app.actions';
 
 @Component({
   selector: 'app-report-list',
@@ -53,6 +55,7 @@ export class ReportListComponent implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private serverService = inject(ServerService);
+  private actions$ = inject(Actions);
 
   private subscriptions: Subscription = new Subscription();
 
@@ -98,17 +101,11 @@ export class ReportListComponent implements OnInit, OnDestroy {
     // Start SignalR connection
     this.signalRService.startConnection();
 
-    // Subscribe to report ready events
+    // Refresh reports when notification arrives via NgRx
     this.subscriptions.add(
-      this.signalRService.reportReady$.subscribe((reportInfo: any) => {
-        if (reportInfo) {
-          this.snackBar.open(`Report "${reportInfo.reportTitle}" is ready!`, 'Download', { duration: 5000 })
-            .onAction().subscribe(() => {
-              this.viewReportDetails(reportInfo.reportId);
-            });
-          this.refreshReports();
-          this.loadStats();
-        }
+      this.actions$.pipe(ofType(AppActions.reportGenerated)).subscribe(() => {
+        this.loadReports();
+        this.loadStats();
       })
     );
 
